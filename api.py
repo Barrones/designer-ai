@@ -17,6 +17,7 @@ from __future__ import annotations
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
@@ -29,6 +30,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="Designer AI API", version="1.0.0")
+
+
+@app.on_event("startup")
+def _bootstrap():
+    """No Railway: restaura o token OAuth a partir da variável de ambiente."""
+    token_json = os.getenv("GOOGLE_OAUTH_TOKEN", "")
+    if token_json:
+        token_path = os.path.expanduser("~/.designer_ai_token.json")
+        if not os.path.exists(token_path):
+            with open(token_path, "w") as f:
+                f.write(token_json)
+            print("✅ OAuth token restaurado do env.")
 
 app.add_middleware(
     CORSMiddleware,
@@ -78,6 +91,18 @@ def _make_output_dir(brand_slug: str) -> str:
     path = os.path.join("output", f"{brand_slug}_{ts}")
     os.makedirs(path, exist_ok=True)
     return path
+
+
+def _upload_to_drive(files: list[str], brand_slug: str, topic: str, content_type: str) -> list[str]:
+    """Faz upload para Drive se configurado. Retorna lista de URLs ou lista vazia."""
+    if not os.getenv("GOOGLE_DRIVE_FOLDER_ID"):
+        return []
+    try:
+        from designer.delivery.drive import upload_carousel
+        return upload_carousel(files=files, brand_slug=brand_slug, topic=topic, content_type=content_type)
+    except Exception as e:
+        print(f"  ⚠ Drive upload: {e}")
+        return []
 
 
 def _dict_to_copy(d: dict):
@@ -181,11 +206,14 @@ def render_carousel(req: CarouselRequest):
             render_slide(slide=slide, accent_color=accent_rgb, handle=handle, output_path=sp)
             slide_paths.append(sp)
 
+        drive_urls = _upload_to_drive(slide_paths, req.brand_slug, "carousel", "carrosséis")
+
         return {
             "ok": True,
             "cover_path": cover_path,
             "slide_paths": slide_paths,
             "total_slides": len(slide_paths),
+            "drive_urls": drive_urls,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -222,7 +250,9 @@ def render_video(req: VideoRequest):
             duration=req.duration,
         )
 
-        return {"ok": True, "video_path": output_video}
+        drive_urls = _upload_to_drive([output_video], req.brand_slug, "reel", "videos")
+
+        return {"ok": True, "video_path": output_video, "drive_urls": drive_urls}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -244,6 +274,13 @@ def render_ads(req: AdsRequest):
             niche=req.niche,
         )
 
+        ads_files = [ads.report_path]
+        for f in Path(ads.google_ads_dir).glob("*"):
+            ads_files.append(str(f))
+        for f in Path(ads.meta_ads_dir).glob("*"):
+            ads_files.append(str(f))
+        drive_urls = _upload_to_drive(ads_files, req.brand_slug, req.brand_name + " — Ads", "ads")
+
         return {
             "ok": True,
             "google_ads_dir": ads.google_ads_dir,
@@ -251,6 +288,7 @@ def render_ads(req: AdsRequest):
             "report_path": ads.report_path,
             "google_copy": ads.google_copy,
             "meta_copy": ads.meta_copy,
+            "drive_urls": drive_urls,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

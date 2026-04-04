@@ -1,0 +1,67 @@
+{
+  "slug": "force-protocol",
+  "client_name": "Force Protocol",
+  "niche": "suplementos esportivos",
+  "subniche": "suplementação de performance para hipertrofia masculina",
+  "product": "suplementos",
+  "goal": "Vender mais",
+  "tone": "direto, técnico sem ser acadêmico, provocativo e baseado em resultados reais — fala como quem treina, não como quem vende",
+  "content_pillars": [
+    "Ciência aplicada ao treino (sem enrolação)",
+    "Resultados visuais e progresso real",
+    "Protocolo de suplementação inteligente"
+  ],
+  "content_angles": [
+    "Erro comum: Você toma whey na hora errada e perde 30% do resultado — veja o protocolo correto",
+    "Comparação: Creatina monohidratada vs. HCl — qual realmente vale o preço no Brasil?",
+    "Urgência: Seu corpo tem uma janela de 45 minutos pós-treino que você provavelmente está desperdiçando",
+    "Prova: Cliente com 8 semanas usando nosso stack de ganho — foto, peso e exames antes e depois",
+    "Educação: Por que a maioria dos homens que treina há 2 anos ainda não viu resultado real — e o que a suplementação tem a ver com isso"
+  ],
+  "suggested_formats": [
+    "carrossel técnico com dados",
+    "reels de bastidores de treino + suplementação",
+    "antes e depois com protocolo detalhado",
+    "stories de comparação de produtos",
+    "vídeos curtos de desmistificação"
+  ],
+  "audience": {
+    "description": "Homens brasileiros entre 25 e 38 anos que treinam musculação há pelo menos 1 ano, trabalham durante o dia, treinam de manhã cedo ou à noite, já gastaram dinheiro com suplementos sem ver resultado proporcional, e sentem que estão estagnados. Consomem muito conteúdo fitness no Instagram e YouTube, mas têm dificuldade de filtrar o que é marketing do que é ciência. Compram por impulso mas justificam com lógica.",
+    "age_range": "25-38 anos",
+    "pains": [
+      "Gastaram mais de R$300/mês em suplementos e o shape continua o mesmo há 6 meses",
+      "Não sabem se o que tomam é necessário ou só jogam dinheiro fora por influência de digital",
+      "Sentem que o corpo não responde mais ao treino como respondia no começo — e não sabem o que mudar"
+    ],
+    "desires": [
+      "Ter um físico visivelmente diferente em 90 dias — não perfeito, mas notável para quem conhece",
+      "Saber exatamente o que tomar, quando e por quê — sem precisar estudar nutrição esportiva",
+      "Sentir que cada real gasto em suplemento está trabalhando por eles durante o dia"
+    ],
+    "language": [
+      "'Tô travado há meses, não consigo passar dessa marca'",
+      "'Quero um stack que realmente funcione, sem papo'",
+      "'Meu treino tá ótimo, acho que é a alimentação/suplementação que tá me segurando'"
+    ]
+  },
+  "color_palette": {
+    "primary": "#0D0D0D",
+    "secondary": "#C8FF00",
+    "accent": "#1A1A2E",
+    "text": "#FFFFFF"
+  },
+  "typography": {
+    "headline": "Anton",
+    "body": "Inter"
+  },
+  "market_gaps": [
+    "Falta de marcas que falem com homens comuns que treinam — o mercado fala com atletas ou iniciantes, ignorando quem treina há 2-4 anos e está estagnado",
+    "Nenhuma marca de suplemento no Brasil educa sobre protocolos completos (combo de produtos + timing + treino) em vez de empurrar produto isolado"
+  ],
+  "competitor_patterns": [
+    "Concorrentes usam atletas famosos e corpos irreais como prova social, criando distância com o público médio",
+    "A maioria das marcas compete só em preço e frete grátis, sem construir nenhuma autoridade técnica ou identidade de comunidade"
+  ],
+  "handle": "@forceprotocol",
+  "created_at": ""
+}

@@ -1,0 +1,72 @@
+{
+  "slug": "box",
+  "client_name": "BOX",
+  "niche": "CARTAo de credito",
+  "subniche": "CARTAo de credito ",
+  "product": "CARTAo de credito ",
+  "goal": "Criar conteúdo de alto impacto para CARTAo de credito ",
+  "tone": "Direto, descontraído e cúmplice — fala como um amigo que entende de finanças e não te julga, usa humor leve para tratar de assuntos que geram vergonha, mas entrega informação densa e prática sem enrolação",
+  "content_pillars": [
+    "Educação Financeira Prática — como o cartão funciona de verdade, sem juridiquês",
+    "Comparação e Curadoria — qual cartão vale para qual perfil de vida",
+    "Hacks e Estratégias — como maximizar pontos, cashback e benefícios reais",
+    "Comportamento e Identidade — a relação emocional e cultural do brasileiro com o cartão de crédito"
+  ],
+  "content_angles": [
+    "Mito vs Verdade — 'Cartão de crédito te deixa pobre' é mentira? Desmontando crenças limitantes sobre crédito",
+    "POV e identificação — 'Você também faz isso com seu cartão?' situações cotidianas constrangedoras ou engraçadas que geram comentários",
+    "Ranking e comparação — 'Os 3 melhores cartões para quem ganha X por mês' — listas práticas e segmentadas",
+    "Antes e depois — 'Como eu usava meu cartão errado VS como uso agora' — transformação pessoal como prova social",
+    "Bastidores e transparência — 'O que o banco não te conta sobre pontos e anuidade' — conteúdo de denúncia que gera engajamento por indignação"
+  ],
+  "suggested_formats": [
+    "carrossel",
+    "reels"
+  ],
+  "trends": [
+    "Cartões com cashback em real direto na fatura (não mais pontos que 'vencem') como diferencial decisivo de escolha em 2025/2026",
+    "Fintechs disputando clientes dos grandes bancos com anuidade zero e aprovação 100% digital — o 'banco tradicional' virou vilão nas redes",
+    "Conteúdo de 'cartão recusado' e micos financeiros viralizando como humor de identificação — o constrangimento virou trend",
+    "Uso de múltiplos cartões estrategicamente combinados (um para pontos, outro para cashback, outro para limite) — o 'cartão stack' é tendência entre os mais engajados",
+    "Pagamentos via aproximação, carteira digital e compras internacionais em dólar sem IOF dominando as buscas e discussões no TikTok Brasil"
+  ],
+  "topic_suggestions": [
+    "5 sinais de que você está usando seu cartão de crédito do jeito errado (e nem percebe)",
+    "Cartão recusado: por que acontece e o que fazer nos próximos 10 minutos para resolver",
+    "Cartão X vs Cartão Y — qual vale mais para quem gasta mais em supermercado e combustível?",
+    "Como pedir aumento de limite sem ser negado — o passo a passo que os bancos não divulgam",
+    "Cashback vs Milhas: qual rende mais para o seu perfil em 2026? (com simulação real)"
+  ],
+  "audience": {
+    "description": "Brasileiros entre 20 e 35 anos, das classes B e C em ascensão, que usam cartão de crédito no dia a dia mas sentem que não estão aproveitando todo o potencial — ora com medo de se endividar, ora querendo status e benefícios que o cartão certo poderia oferecer.",
+    "age_range": "25-45",
+    "pains": [
+      "Ter o cartão recusado em público — especialmente na frente de outras pessoas — e a vergonha paralisante que isso causa",
+      "Pagar anuidade cara de um cartão que não entrega benefícios proporcionais e não saber como cancelar ou negociar sem cair em armadilha",
+      "Acumular pontos que vencem antes de usar ou que nunca são suficientes para resgatar nada de valor real",
+      "Receber cobranças indevidas na fatura e não saber como contestar — sentir-se impotente diante do banco",
+      "Ter limite baixo que não cobre o estilo de vida desejado e não saber como pedir aumento sem ser negado novamente",
+      "Medo de entrar em dívida no rotativo sem perceber — a sensação de que o cartão é uma armadilha disfarçada de conveniência"
+    ],
+    "desires": [
+      "Ter um cartão premium (preto, infinite, Mastercard Black) como símbolo de status e de que 'chegou lá' financeiramente",
+      "Viajar de graça ou com grande desconto usando milhas — a fantasia de 'hackear o sistema' dos pontos",
+      "Ter controle total sobre o próprio dinheiro: saber exatamente o que gastou, ganhou de cashback e quanto economizou no mês",
+      "Ser aprovado nos melhores cartões do mercado e fazer parte do grupo que 'sabe usar crédito a seu favor' — pertencimento e inteligência financeira"
+    ],
+    "language": [
+      "'Meu limite não passa' / 'meu limite é uma piada'",
+      "'Tô no rotativo' — usado com tom de confissão ou humor autodepreciativo",
+      "'Cartão recusado' como meme e situação de terror cotidiano",
+      "'Pontos que não valem nada' / 'cashback de verdade, não de mentira'"
+    ]
+  },
+  "color_palette": {
+    "primary": "#0A1628",
+    "secondary": "#1E3A5F",
+    "accent": "#1A1A2E",
+    "text": "#FFFFFF"
+  },
+  "handle": "@box",
+  "created_at": "2026-04-04T01:15:23.930464"
+}

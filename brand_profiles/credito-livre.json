@@ -1,0 +1,71 @@
+{
+  "slug": "credito-livre",
+  "client_name": "Crédito Livre",
+  "niche": "finanças pessoais",
+  "subniche": "crédito para negativados e superendividados",
+  "product": "cartão de crédito sem consulta ao SPC/Serasa",
+  "goal": "aprovar cartão para quem foi recusado em todos os outros bancos",
+  "tone": "empático, acolhedor, esperançoso — fala com quem está envergonhado da situação financeira",
+  "content_pillars": [
+    "dívida não é sentença",
+    "reconstrução financeira",
+    "acesso ao crédito",
+    "educação financeira"
+  ],
+  "content_angles": [
+    "a dor de ser negativado",
+    "recomeço financeiro",
+    "tecnologia que inclui",
+    "aprovação rápida"
+  ],
+  "suggested_formats": [
+    "carrossel",
+    "reels",
+    "depoimento"
+  ],
+  "audience": {
+    "description": "adultos negativados que foram recusados em bancos tradicionais e estão tentando reconstruir a vida financeira",
+    "age_range": "25-55",
+    "pains": [
+      "recusado em todo banco",
+      "não consegue pagar contas",
+      "envergonhado de pedir crédito",
+      "sem acesso a serviços básicos"
+    ],
+    "desires": [
+      "limpar o nome",
+      "ter um cartão",
+      "voltar a comprar parcelado",
+      "ser tratado com dignidade"
+    ],
+    "language": [
+      "negativado",
+      "nome sujo",
+      "não aprovei",
+      "recusei em tudo",
+      "tô no aperto"
+    ]
+  },
+  "color_palette": {
+    "primary": "#0A1628",
+    "secondary": "#1E90FF",
+    "accent": "#00D4FF",
+    "text": "#FFFFFF"
+  },
+  "typography": {
+    "headline": "Bebas Neue",
+    "body": "Inter"
+  },
+  "market_gaps": [
+    "bancos ignoram negativados",
+    "fintechs cobram taxas abusivas",
+    "processo de aprovação humilhante"
+  ],
+  "competitor_patterns": [
+    "exige score alto",
+    "muita burocracia",
+    "nega sem explicação"
+  ],
+  "handle": "@creditolivre",
+  "created_at": "2026-04-03T23:25:36.100738"
+}

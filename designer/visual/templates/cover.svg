@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CAROUSEL COVER TEMPLATE — 1080 × 1350 px (Instagram 4:5)
+  Placeholders: {{POWERED_BY}} {{HANDLE}} {{YEAR}}
+                {{HEADLINE_PART1}} {{HEADLINE_PART2}}
+                {{IMAGE_URL}}  {{ACCENT_COLOR}}
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 1080 1350"
+     width="1080" height="1350">
+
+  <defs>
+    <!-- Header / footer gradient: blue → red -->
+    <linearGradient id="barGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#1A1A8B"/>
+      <stop offset="100%" stop-color="#8B0000"/>
+    </linearGradient>
+
+    <!-- Vertical dark overlay (transparent → near-black) -->
+    <linearGradient id="overlayGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#000000" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.86"/>
+    </linearGradient>
+
+    <!-- Google Fonts imports -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Anton&amp;family=Barlow+Condensed:ital,wght@1,700&amp;family=Inter:wght@300;500&amp;display=swap');
+
+      .ui       { font-family: 'Inter', sans-serif; font-weight: 300;
+                  font-size: 21px; letter-spacing: 0.06em; fill: #FFFFFF; }
+      .handle   { font-family: 'Inter', sans-serif; font-weight: 500;
+                  font-size: 30px; fill: #FFFFFF; }
+      .hl1      { font-family: 'Anton', sans-serif; font-size: 92px;
+                  text-transform: uppercase; fill: #FFFFFF; }
+      .hl2      { font-family: 'Barlow Condensed', sans-serif;
+                  font-weight: 700; font-style: italic; font-size: 88px;
+                  text-transform: uppercase; fill: {{ACCENT_COLOR}}; }
+    </style>
+  </defs>
+
+  <!-- ── 1. Background image ─────────────────────────────────────────── -->
+  <image href="{{IMAGE_URL}}"
+         x="0" y="0" width="1080" height="1350"
+         preserveAspectRatio="xMidYMid slice"/>
+
+  <!-- ── 2. Dark overlay ──────────────────────────────────────────────── -->
+  <rect x="0" y="0" width="1080" height="1350" fill="url(#overlayGrad)"/>
+
+  <!-- ── 3. Header bar ────────────────────────────────────────────────── -->
+  <rect x="0" y="0" width="1080" height="40" fill="url(#barGrad)"/>
+
+  <!-- Header text -->
+  <text x="48"   y="26" class="ui" text-anchor="start">Powered by {{POWERED_BY}}</text>
+  <text x="540"  y="26" class="ui" text-anchor="middle">{{HANDLE}}</text>
+  <text x="1032" y="26" class="ui" text-anchor="end">{{YEAR}} //</text>
+
+  <!-- ── 4. @handle + verified (above headline) ───────────────────────── -->
+  <text x="48" y="836" class="handle">☀  {{HANDLE}}  ✓</text>
+
+  <!-- ── 5. Headline part 1 (white, Anton) ────────────────────────────── -->
+  <!--
+    Long headlines are wrapped by the Python renderer.
+    This SVG shows a single-line example; the renderer handles multi-line.
+  -->
+  <text x="48" y="940" class="hl1">{{HEADLINE_PART1}}</text>
+
+  <!-- ── 6. Headline part 2 (accent color, Barlow Bold Italic) ────────── -->
+  <text x="48" y="1048" class="hl2">{{HEADLINE_PART2}}</text>
+
+  <!-- ── 7. Footer bar ────────────────────────────────────────────────── -->
+  <rect x="0" y="1310" width="1080" height="40" fill="url(#barGrad)"/>
+
+</svg>

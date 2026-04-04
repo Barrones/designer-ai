@@ -1,0 +1,443 @@
+{
+  "name": "Designer AI — Content Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "designer-ai",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Webhook — Receber briefing",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 400],
+      "notes": "Recebe: brand_slug, brand_name, niche, topic, cta, content_type (carousel|video|both), creator (opcional)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "out-dir",
+              "name": "output_dir",
+              "value": "=output/{{ $json.body.brand_slug }}_{{ $now.format('yyyyMMdd_HHmmss') }}",
+              "type": "string"
+            },
+            {
+              "id": "brand_slug",
+              "name": "brand_slug",
+              "value": "={{ $json.body.brand_slug }}",
+              "type": "string"
+            },
+            {
+              "id": "brand_name",
+              "name": "brand_name",
+              "value": "={{ $json.body.brand_name }}",
+              "type": "string"
+            },
+            {
+              "id": "niche",
+              "name": "niche",
+              "value": "={{ $json.body.niche ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "topic",
+              "name": "topic",
+              "value": "={{ $json.body.topic }}",
+              "type": "string"
+            },
+            {
+              "id": "cta",
+              "name": "cta",
+              "value": "={{ $json.body.cta ?? 'Saiba mais' }}",
+              "type": "string"
+            },
+            {
+              "id": "content_type",
+              "name": "content_type",
+              "value": "={{ $json.body.content_type ?? 'both' }}",
+              "type": "string"
+            },
+            {
+              "id": "creator",
+              "name": "creator",
+              "value": "={{ $json.body.creator ?? null }}",
+              "type": "string"
+            },
+            {
+              "id": "duration",
+              "name": "duration",
+              "value": "={{ $json.body.duration ?? 15 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-set-vars",
+      "name": "Preparar variáveis",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/copy",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, topic: $json.topic, creator: $json.creator }) }}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "node-copy",
+      "name": "✍️ Gerar Copy (Claude)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mescla o copy com as variáveis do Set node\nconst copy = $input.item.json;\nconst vars = $('Preparar variáveis').item.json;\n\nif (!copy.ok) {\n  throw new Error('Erro ao gerar copy: ' + JSON.stringify(copy));\n}\n\nreturn {\n  // variáveis do briefing\n  brand_slug: vars.brand_slug,\n  brand_name: vars.brand_name,\n  niche: vars.niche,\n  output_dir: vars.output_dir,\n  cta: vars.cta,\n  content_type: vars.content_type,\n  duration: vars.duration,\n  // copy gerado\n  copy: {\n    formula: copy.formula,\n    headline_part1: copy.headline_part1,\n    headline_part2: copy.headline_part2,\n    caption: copy.caption,\n    hashtags: copy.hashtags,\n    image_query: copy.image_query,\n    video_query: copy.video_query,\n    compliance_flags: copy.compliance_flags\n  },\n  // flags de compliance para notificação\n  has_compliance_flags: (copy.compliance_flags ?? []).length > 0,\n  compliance_summary: (copy.compliance_flags ?? []).join(' | ')\n};"
+      },
+      "id": "node-merge-copy",
+      "name": "Montar payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "cond-carousel",
+              "leftValue": "={{ $json.content_type }}",
+              "rightValue": "video",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-carousel",
+      "name": "Tem Carrossel?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/render/carousel",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, output_dir: $json.output_dir, copy: $json.copy }) }}",
+        "options": { "timeout": 120000 }
+      },
+      "id": "node-carousel",
+      "name": "🖼️ Renderizar Carrossel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "cond-video",
+              "leftValue": "={{ $json.content_type }}",
+              "rightValue": "carousel",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-video",
+      "name": "Tem Vídeo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 520]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/render/video",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, output_dir: $json.output_dir, copy: $json.copy, cta: $json.cta, duration: $json.duration }) }}",
+        "options": { "timeout": 180000 }
+      },
+      "id": "node-video",
+      "name": "🎬 Renderizar Vídeo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 600]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Consolida resultado de carrossel + vídeo\nconst vars = $('Montar payload').item.json;\n\nlet cover_path = null;\nlet video_path = null;\nlet slide_paths = [];\n\ntry {\n  const carousel = $('🖼️ Renderizar Carrossel').item.json;\n  if (carousel && carousel.ok) {\n    cover_path = carousel.cover_path;\n    slide_paths = carousel.slide_paths ?? [];\n  }\n} catch(e) {}\n\ntry {\n  const video = $('🎬 Renderizar Vídeo').item.json;\n  if (video && video.ok) {\n    video_path = video.video_path;\n  }\n} catch(e) {}\n\nreturn {\n  brand_slug: vars.brand_slug,\n  brand_name: vars.brand_name,\n  niche: vars.niche,\n  output_dir: vars.output_dir,\n  copy: vars.copy,\n  cover_path,\n  video_path,\n  slide_paths,\n  has_compliance_flags: vars.has_compliance_flags,\n  compliance_summary: vars.compliance_summary\n};"
+      },
+      "id": "node-consolidate",
+      "name": "Consolidar resultados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false },
+          "conditions": [
+            {
+              "id": "cond-has-cover",
+              "leftValue": "={{ $json.cover_path }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-ads",
+      "name": "Tem capa para Ads?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1780, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/render/ads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, brand_name: $json.brand_name, niche: $json.niche, output_dir: $json.output_dir, copy: $json.copy, cover_image_path: $json.cover_path, video_path: $json.video_path }) }}",
+        "options": { "timeout": 120000 }
+      },
+      "id": "node-ads",
+      "name": "📦 Gerar Pacote de Ads",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Monta o relatório final\nconst vars = $('Consolidar resultados').item.json;\n\nlet ads_data = {};\ntry {\n  const ads = $('📦 Gerar Pacote de Ads').item.json;\n  if (ads && ads.ok) {\n    ads_data = {\n      google_copy: ads.google_copy,\n      meta_copy: ads.meta_copy,\n      report_path: ads.report_path\n    };\n  }\n} catch(e) {}\n\nconst copy = vars.copy;\n\nreturn {\n  ok: true,\n  brand: vars.brand_slug,\n  output_dir: vars.output_dir,\n  headline: copy.headline_part1 + ' ' + copy.headline_part2,\n  caption: copy.caption,\n  hashtags: copy.hashtags,\n  cover_path: vars.cover_path,\n  video_path: vars.video_path,\n  slide_paths: vars.slide_paths,\n  compliance_flags: vars.compliance_summary,\n  ads: ads_data,\n  generated_at: new Date().toISOString()\n};"
+      },
+      "id": "node-final",
+      "name": "Montar resposta final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2220, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false },
+          "conditions": [
+            {
+              "id": "cond-compliance",
+              "leftValue": "={{ $json.compliance_flags }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-compliance",
+      "name": "Tem alertas de compliance?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2440, 400]
+    },
+    {
+      "parameters": {
+        "content": "⚠️ **ALERTA DE COMPLIANCE**\n\n**Marca:** {{ $('Montar resposta final').item.json.brand }}\n**Tema:** {{ $('Montar resposta final').item.json.headline }}\n\n**Flags:**\n{{ $('Montar resposta final').item.json.compliance_flags }}\n\nRevise antes de publicar.",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $env.DISCORD_CHANNEL_ID }}",
+          "mode": "id"
+        }
+      },
+      "id": "node-discord-compliance",
+      "name": "⚠️ Discord — Alerta Compliance",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [2660, 280],
+      "credentials": {
+        "discordBotApi": {
+          "id": "CONFIGURE_DISCORD_CREDENTIAL",
+          "name": "Discord Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "✅ **Designer AI — Conteúdo Gerado!**\n\n**Marca:** {{ $json.brand }}\n**Headline:** {{ $json.headline }}\n\n**Arquivos:**\n🖼️ Capa: `{{ $json.cover_path ?? 'n/a' }}`\n🎬 Vídeo: `{{ $json.video_path ?? 'n/a' }}`\n📊 Slides: {{ ($json.slide_paths ?? []).length }}\n📦 Relatório Ads: `{{ $json.ads.report_path ?? 'n/a' }}`\n\n_Gerado em {{ $json.generated_at }}_",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $env.DISCORD_CHANNEL_ID }}",
+          "mode": "id"
+        }
+      },
+      "id": "node-discord-ok",
+      "name": "✅ Discord — Notificar Pronto",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [2660, 520],
+      "credentials": {
+        "discordBotApi": {
+          "id": "CONFIGURE_DISCORD_CREDENTIAL",
+          "name": "Discord Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($('Montar resposta final').item.json) }}"
+      },
+      "id": "node-respond",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2880, 400]
+    }
+  ],
+  "connections": {
+    "Webhook — Receber briefing": {
+      "main": [
+        [{ "node": "Preparar variáveis", "type": "main", "index": 0 }]
+      ]
+    },
+    "Preparar variáveis": {
+      "main": [
+        [{ "node": "✍️ Gerar Copy (Claude)", "type": "main", "index": 0 }]
+      ]
+    },
+    "✍️ Gerar Copy (Claude)": {
+      "main": [
+        [{ "node": "Montar payload", "type": "main", "index": 0 }]
+      ]
+    },
+    "Montar payload": {
+      "main": [
+        [
+          { "node": "Tem Carrossel?", "type": "main", "index": 0 },
+          { "node": "Tem Vídeo?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Tem Carrossel?": {
+      "main": [
+        [{ "node": "🖼️ Renderizar Carrossel", "type": "main", "index": 0 }],
+        [{ "node": "Consolidar resultados", "type": "main", "index": 0 }]
+      ]
+    },
+    "🖼️ Renderizar Carrossel": {
+      "main": [
+        [{ "node": "Consolidar resultados", "type": "main", "index": 0 }]
+      ]
+    },
+    "Tem Vídeo?": {
+      "main": [
+        [{ "node": "🎬 Renderizar Vídeo", "type": "main", "index": 0 }],
+        [{ "node": "Consolidar resultados", "type": "main", "index": 1 }]
+      ]
+    },
+    "🎬 Renderizar Vídeo": {
+      "main": [
+        [{ "node": "Consolidar resultados", "type": "main", "index": 1 }]
+      ]
+    },
+    "Consolidar resultados": {
+      "main": [
+        [{ "node": "Tem capa para Ads?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Tem capa para Ads?": {
+      "main": [
+        [{ "node": "📦 Gerar Pacote de Ads", "type": "main", "index": 0 }],
+        [{ "node": "Montar resposta final", "type": "main", "index": 0 }]
+      ]
+    },
+    "📦 Gerar Pacote de Ads": {
+      "main": [
+        [{ "node": "Montar resposta final", "type": "main", "index": 0 }]
+      ]
+    },
+    "Montar resposta final": {
+      "main": [
+        [{ "node": "Tem alertas de compliance?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Tem alertas de compliance?": {
+      "main": [
+        [
+          { "node": "⚠️ Discord — Alerta Compliance", "type": "main", "index": 0 },
+          { "node": "Responder Webhook", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "✅ Discord — Notificar Pronto", "type": "main", "index": 0 },
+          { "node": "Responder Webhook", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "⚠️ Discord — Alerta Compliance": {
+      "main": [[]]
+    },
+    "✅ Discord — Notificar Pronto": {
+      "main": [[]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "designer-ai"
+  },
+  "tags": [
+    { "createdAt": "2026-04-04T00:00:00.000Z", "updatedAt": "2026-04-04T00:00:00.000Z", "id": "tag-1", "name": "content" },
+    { "createdAt": "2026-04-04T00:00:00.000Z", "updatedAt": "2026-04-04T00:00:00.000Z", "id": "tag-2", "name": "ai" }
+  ]
+}

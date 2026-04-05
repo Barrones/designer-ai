@@ -1,0 +1,108 @@
+{
+  "slug": "nike",
+  "client_name": "Nike",
+  "niche": "moda esportiva",
+  "subniche": "tênis, roupas e acessórios esportivos para lifestyle e performance",
+  "product": "tênis, roupas e acessórios Nike",
+  "goal": "aumentar desejo e conversão em anúncios pagos via UGC autêntico",
+  "tone": "inspirador, direto, sem frescura — fala com quem vive o esporte no dia a dia, não com atleta olímpico",
+  "content_pillars": [
+    "performance real — para quem treina de verdade",
+    "estilo de vida — o tênis que vai do treino para a rua",
+    "cultura — street, sport e música juntos"
+  ],
+  "content_angles": [
+    "O tênis que uso há 6 meses — vale cada centavo?",
+    "Comprei na Shein vs. Nike — a diferença que ninguém mostra",
+    "Testei correr 30 dias com o mesmo tênis Nike — o que aconteceu",
+    "Por que troquei meu tênis de academia por esse modelo",
+    "O look do dia que mais recebi elogio — só Nike"
+  ],
+  "suggested_formats": [
+    "ugc review",
+    "ugc comparação",
+    "ugc descoberta",
+    "reels lifestyle",
+    "carrossel produto"
+  ],
+  "audience": {
+    "description": "Jovens brasileiros entre 18 e 32 anos que gostam de moda, estilo e esporte. Usam tênis como acessório de moda tanto quanto de performance. Seguem influencers de lifestyle, streetwear e fitness. Compram por desejo e identidade, não só por função.",
+    "age_range": "18-32",
+    "pains": [
+      "Tênis bonito que machuca depois de 2h de uso",
+      "Gasta caro e o produto não dura",
+      "Não sabe qual modelo comprar — muitas opções",
+      "Quer parecer stylish mas sem gastar o salário todo"
+    ],
+    "desires": [
+      "Tênis que serve para academia E para sair",
+      "Looks que recebem elogio",
+      "Produto que dura e mantém aparência",
+      "Sentir que fez uma boa compra"
+    ],
+    "language": [
+      "esse tênis é um sonho",
+      "uso pra tudo",
+      "chegou e já quero outro",
+      "vale o hype",
+      "olha o acabamento"
+    ]
+  },
+  "color_palette": {
+    "primary": "#111111",
+    "secondary": "#FA5400",
+    "accent": "#FFFFFF",
+    "text": "#FFFFFF"
+  },
+  "typography": {
+    "headline": "Anton",
+    "body": "Inter"
+  },
+  "market_gaps": [
+    "UGC de Nike no Brasil é genérico — falta conteúdo com cara de pessoa real",
+    "Poucos conteúdos mostram o tênis no dia a dia real, não em estúdio"
+  ],
+  "competitor_patterns": [
+    "Adidas aposta em atletas — Nike pode apostar em pessoas comuns",
+    "Concorrentes focam em preço — Nike vende identidade"
+  ],
+  "handle": "@nike",
+  "created_at": "",
+  "creative_direction": {
+    "carousel": {
+      "style": "bold moderno",
+      "mood": "energético, confiante, urbano — sem exagero",
+      "forbidden": ["imagens de estúdio branco genérico", "modelos que parecem manequins"],
+      "accent_usage": "laranja Nike (#FA5400) em palavras de ação e destaque"
+    },
+    "video_reel": {
+      "scene_mood": "lifestyle urbano real — rua, academia, café, parque",
+      "footage_style": "câmera na mão, luz natural, movimento",
+      "forbidden_footage": ["estúdio fake", "dança coreografada", "filtro exagerado"],
+      "text_position": "terço inferior",
+      "overlay": "dark leve com accent laranja",
+      "pexels_queries": [
+        "young woman sneakers street style urban",
+        "fitness lifestyle athletic shoes city",
+        "sporty fashion lifestyle authentic",
+        "running shoes street urban youth"
+      ],
+      "min_duration": 10,
+      "max_duration": 20
+    },
+    "ugc": {
+      "persona": "jovem brasileira que ama moda e esporte — não atleta profissional",
+      "hook_style": "começa mostrando o produto ou com situação do dia a dia",
+      "forbidden": ["linguagem corporativa", "'produto de qualidade excepcional'", "voz de locutor"],
+      "cta_style": "natural — 'link na bio', 'já pedi o meu', 'corre lá'"
+    },
+    "motion_ad": {
+      "style": "dark urbano com laranja de impacto",
+      "animation": "texto seco e rápido, como um drop de tênis",
+      "use_when": "lançamento de modelo, campanha sazonal",
+      "duration_seconds": 15,
+      "aspect_ratio": "9:16",
+      "remotion_template": "dark_impact"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-"""Carousel cover renderer — produces a 1080×1350 PNG matching BrandsDecoded style."""
+"""Carousel cover renderer — produces a 1080×1350 PNG matching Designer AI style."""
 from __future__ import annotations
 
 import os

@@ -1,6 +1,7 @@
 """
-Copy Engine — Prompt Master Senior
-Gera copy de alto impacto respeitando os limites das plataformas.
+Copy Engine — Designer AI Headline Engine v5
+Gera 10 headlines calibradas por dados de 1.168 posts analisados.
+Inclui lift patterns, gatilhos emocionais e checklist de rejeição.
 """
 from __future__ import annotations
 
@@ -13,212 +14,223 @@ from designer.brand.profile import BrandProfile
 
 
 # ============================================================
-# FÓRMULAS DE HEADLINE
+# HEADLINE FORMATS
 # ============================================================
-_FORMULAS = """
-F1 — CONTEXTO + PROVOCAÇÃO
-  Estrutura: "[Contexto conhecido]: [Afirmação que inverte a expectativa]"
-  Exemplo: "NEGATIVADO HÁ 3 ANOS: O QUE OS BANCOS NÃO QUEREM QUE VOCÊ DESCUBRA"
-  Quando usar: tema com situação reconhecível + revelação inesperada.
+_HEADLINE_FORMATS = """
+FORMATO 1 — INVESTIGAÇÃO CULTURAL (opções 1–5)
+Estrutura OBRIGATÓRIA: [Reenquadramento provocativo]: [Hook de curiosidade]
+Separadas por dois-pontos. Frase 1 redefine o fenômeno. Frase 2 cria lacuna.
 
-F2 — AFIRMAÇÃO BOLD + PERGUNTA
-  Estrutura: "[Verdade que dói ou surpreende]: [Pergunta que o público já se faz em silêncio]"
-  Exemplo: "SEU SCORE BAIXO NÃO É O PROBLEMA: ENTÃO POR QUE CONTINUAM TE NEGANDO?"
-  Quando usar: mitos, crenças limitantes, contradições do mercado.
+Exemplos CORRETOS (banco de 56 hooks com +10k likes):
+- "A Morte do Gosto Pessoal: Como a Dopamina Digital Nos Tornou Indiferentes" (115k likes)
+- "A corrida virou a nova balada: por que a Geração Z trocou o bar pelo asfalto às 6h da manhã"
+- "O dado que nenhum guru quer admitir: posts sobre o nicho performam 4× pior que posts sobre cultura"
+- "A Morte dos Influencers de Lifestyle: Bem-vindos à Nova Era da Criação de Conteúdo" (82k likes)
+- "O Fim do Conteúdo Fast Food: Por que Posts Inteligentes estão Voltando a Dominar o Instagram" (17k likes)
 
-F3 — DADO + CONSEQUÊNCIA
-  Estrutura: "[Número ou fato concreto]: [O que isso significa para o público]"
-  Exemplo: "7 EM CADA 10 BRASILEIROS TÊM O NOME SUJO: E A MAIORIA NEM SABE POR QUÊ"
-  Quando usar: estatísticas reais, pesquisas, tendências com impacto direto.
+Exemplos ERRADOS (rejeitar imediatamente):
+- ❌ "As academias reabriram. Ninguém parou de correr." — falta dois-pontos, falta hook de curiosidade
+- ❌ "A corrida é o novo fenômeno do Brasil" — declaração direta, sem tensão
+- ❌ "Por que todo mundo está correndo" — pergunta genérica sem reenquadramento
 
-F4 — PROVOCAÇÃO PURA
-  Estrutura: "[Nome do problema que o público vive]: [Virada contraintuitiva]"
-  Exemplo: "A RECUSA DO BANCO: O SINAL DE QUE VOCÊ ESTAVA BATENDO NA PORTA ERRADA"
-  Quando usar: reframing de situação negativa em oportunidade.
+Os 5 subpadrões de IC com maior performance:
+IC-1 (Morte/Fim): "A Morte de [X]: [Revelação]" — média 57k likes
+IC-2 (Geracional): "Por que [Geração] está [Comportamento Inesperado]?" — média 28k likes
+IC-3 (Investigando): "Investigando [Fenômeno]" — média 18k likes
+IC-4 (Pop + Revelação): "Como [Nome/Marca] [Ação Inesperada]" — média 20k likes
+IC-5 (Contraste): dois elementos opostos em tensão — média 22k likes
 
-REGRA DE SPLIT:
-  - Parte 1: setup, contexto, nome do problema — termina com ":" — TOM SÉRIO
-  - Parte 2: a virada, o dado chocante, a revelação — TOM PROVOCADOR
-  - Ambas em CAIXA ALTA, máximo 8 palavras cada
+FORMATO 2 — NARRATIVA MAGNÉTICA (opções 6–10)
+Estrutura OBRIGATÓRIA: [Cenário concreto]. [Mecanismo]. [Tensão aberta]
+EXATAMENTE 3 frases com ponto. Frase 1 descreve o que aconteceu. Frase 2 explica como funciona. Frase 3 abre tensão.
+
+Exemplos CORRETOS:
+- "Padre Reginaldo faz live de oração todo dia às 4h da manhã. Tem mais audiência simultânea que streamer profissional, final de campeonato, lançamento de série. Não viralizou, criou rotina — pessoas acordam pra isso."
+- "A Hoka triplicou o faturamento no Brasil três anos seguidos. Nenhum influenciador de lifestyle recomendou. O boca a boca saiu dos clubes de corrida."
+- "Jaden Smith abriu um restaurante onde ninguém paga. O modelo funciona porque cada refeição servida gera R$50 em cobertura de mídia espontânea. Nenhuma agência de publicidade teria criado isso." (53k likes)
+
+Exemplos ERRADOS:
+- ❌ "A corrida está mudando o Brasil" — frase única, sem 3 partes
+- ❌ "Correr virou tendência entre jovens brasileiros" — genérico, sem cenário concreto
+- ❌ Mais de 3 frases — estrutura quebrada
+
+DISTRIBUIÇÃO INTERNA DAS 10:
+1. Reenquadramento | 2. Conflito oculto | 3. Implicação sistêmica
+4. Contradição | 5. Ameaça ou oportunidade
+6. Nomeação | 7. Diagnóstico cultural | 8. Inversão
+9. Ambição de mercado | 10. Mecanismo social
 """
 
-
 # ============================================================
-# GATILHOS PSICOLÓGICOS — MASTER LIST
+# LIFT PATTERNS
 # ============================================================
-_TRIGGERS = """
-GATILHOS PERMITIDOS E COMO USAR (jogue nas 4 linhas, no limite):
+_LIFT_PATTERNS = """
+PADRÕES COM LIFT POSITIVO (usar):
+| Padrão | Lift | Quando usar |
+|---|---|---|
+| Brasil / Contexto Nacional | +155% | Tema conectável com identidade brasileira |
+| Fim / Morte / Crise | +119% | Algo mudando, acabando ou em risco |
+| Geracional | +119% | Comportamento de Gen Z, Millennials, Boomers |
+| Novidade | +99% | Tendência emergente, algo novo |
 
-1. CURIOSIDADE COM GAP DE INFORMAÇÃO
-   Crie uma lacuna entre o que o público sabe e o que você vai revelar.
-   ✅ "o que os bancos não te contam sobre score"
-   ✅ "a cláusula que ninguém lê no contrato do cartão"
-   ❌ "segredo proibido que eles escondem" (sensacionalismo que derruba alcance)
+PADRÕES COM LIFT NEGATIVO (evitar):
+| Padrão | Lift |
+|---|---|
+| Declaração Direta | -29% |
+| Revelação Genérica | -42% |
+| Lista / Dicas / Número | formato morto |
+| Motivacional Vazio | formato morto |
 
-2. PROVA SOCIAL IMPLÍCITA
-   Mostre que outros já fizeram — sem inventar números.
-   ✅ "milhares de brasileiros com nome sujo já conseguiram"
-   ✅ "quem estava na mesma situação há 6 meses hoje tem limite de R$2.000"
-   ❌ "100% aprovado" / "garantido" (proibido em anúncios financeiros)
+PALAVRAS-GATILHO DE ALTA PERFORMANCE:
+morte · novo · fim · brasil · investigando · crise · geração · instagram
 
-3. IDENTIDADE E PERTENCIMENTO
-   Fale para um grupo específico que se reconhece.
-   ✅ "para quem foi recusado em todo banco e ainda não desistiu"
-   ✅ "se você está reconstruindo sua vida financeira, este post é para você"
-   ❌ "para negativados" como targetização explícita em anúncio pago (Special Ad Category)
+6 GATILHOS EMOCIONAIS (mínimo 2 por headline):
+- Nostalgia — memória afetiva
+- Medo/Alerta — urgência, algo em risco
+- Indignação — revolta, "isso está errado"
+- Identidade — "isso é sobre mim"
+- Curiosidade — lacuna de informação
+- Aspiração — desejo de ser/ter/alcançar
 
-4. MEDO DE PERDA (LOSS AVERSION)
-   O que ele perde se não agir — sem urgência falsa.
-   ✅ "cada mês sem crédito é um mês a mais longe da sua reconstrução"
-   ✅ "enquanto você espera o score subir, o custo de vida não espera"
-   ❌ "só até hoje" / "últimas vagas" (urgência artificial = shadowban)
-
-5. REFRAMING DE IDENTIDADE
-   Transforme a dor em identidade positiva.
-   ✅ "negativado não é fracassado — é alguém que o sistema ainda não entendeu"
-   ✅ "nome sujo não é destino, é um estado temporário"
-   ❌ atacar bancos pelo nome (risco de processo + flagging)
-
-6. AUTORIDADE SEM ARROGÂNCIA
-   Demonstre conhecimento, não superioridade.
-   ✅ "depois de analisar 3.000 casos de recusa de crédito, percebemos que..."
-   ✅ "o que aprendemos trabalhando com quem foi recusado em todo banco:"
-   ❌ "somos os melhores do mercado" (afirmação não verificável = banida)
-
-7. ESPECIFICIDADE QUE GERA CREDIBILIDADE
-   Números específicos convencem mais que generalizações.
-   ✅ "aprovação em 48 horas" (se for verdade)
-   ✅ "sem consulta ao SPC em 92% dos casos" (se for real e verificável)
-   ❌ "aprovação instantânea garantida" (promessa absoluta = proibida)
-
-8. CONTRADIÇÃO E QUEBRA DE PADRÃO
-   Contrarie o óbvio para forçar o stop no scroll.
-   ✅ "ter nome sujo pode ser a coisa mais honesta que aconteceu com você"
-   ✅ "o banco te recusou. Isso é um dado, não uma sentença."
+COMBINAÇÕES DE ALTA PERFORMANCE:
+- Nostalgia + Identidade
+- Medo + Geracional
+- Brasil + Identidade
+- Curiosidade + Nostalgia
 """
 
+# ============================================================
+# REJECTION CHECKLIST
+# ============================================================
+_REJECTION_CHECKLIST = """
+CHECKLIST DE REJEIÇÃO (rodar em CADA headline antes de entregar):
+
+Se a headline cair em qualquer um destes, REESCREVER (nunca remover):
+❌ Declaração Direta — afirma sem provocar
+❌ Revelação Genérica — começa com "descubra", "saiba", "conheça"
+❌ Lista / Número de itens — "5 dicas para..."
+❌ Motivacional Vazio — sem tensão, sem dado, sem conflito
+❌ Tom de IA — qualquer conta poderia ter escrito
+❌ Proibidos: "quando X vira Y", "a ascensão de", "o impacto de",
+   "por que X está mudando", "não é X, é Y", "virou" como verbo principal
+
+VALIDAÇÃO OBRIGATÓRIA:
+- IC (1-5): tem dois-pontos separando reenquadramento de hook? Se NÃO → reescrever
+- NM (6-10): tem exatamente 3 frases com ponto? Se NÃO → reescrever
+- Tem pelo menos 2 gatilhos emocionais? Se NÃO → reescrever
+- Tem pelo menos 1 padrão de lift positivo? Se NÃO → reescrever
+"""
 
 # ============================================================
-# COMPLIANCE POR PLATAFORMA E NICHO
+# ANTI-AI SLOP
+# ============================================================
+_ANTI_AI_SLOP = """
+PADRÕES PROIBIDOS NA COPY:
+- "Não é X, é Y" / "Não é sobre X, é sobre Y"
+- "E isso muda tudo"
+- "No fim das contas" / "Ao final do dia"
+- "A pergunta fica:" / "A questão é:"
+- "De forma X" (vaga)
+- "Cada vez mais" (sem dado)
+- "Em um mundo onde" / "Vivemos em uma era"
+- "É preciso" / "Devemos" / "Você precisa"
+- Paralelismos forçados ("X diminui, Y acelera")
+- Headlines com "descubra", "saiba", "conheça" como abertura
+- "Quando X vira Y", "a ascensão de", "o impacto de"
+
+REGRAS GRAMATICAIS:
+- Artigos SEMPRE presentes (um/uma/o/a)
+- Conectivos naturais em cada bloco
+- Cada bloco soa como parágrafo de reportagem
+- Dados com número + fonte + ano
+"""
+
+# ============================================================
+# COMPLIANCE
 # ============================================================
 _COMPLIANCE = """
-REGRAS DE COMPLIANCE — JOGUE NO LIMITE, NÃO CRUZE A LINHA:
+REGRAS DE COMPLIANCE:
+━━━ META / INSTAGRAM ━━━
+  ❌ NUNCA: "aprovação garantida", "100% aprovado", "sem recusa"
+  ❌ NUNCA: urgência falsa ("só hoje", "últimas vagas")
+  ❌ NUNCA: antes/depois financeiro
+  ✅ PODE: números reais com disclaimer "resultados podem variar"
+  ✅ PODE: "processo de análise diferente dos bancos tradicionais"
 
-━━━ META / INSTAGRAM / FACEBOOK ━━━
-
-FINANCEIRO (crédito, empréstimo, cartão) — CATEGORIA ESPECIAL:
-  ❌ NUNCA use: "aprovação garantida", "100% aprovado", "sem recusa"
-  ❌ NUNCA use: discriminação por raça, gênero, localização em copy de anúncio
-  ❌ NUNCA use: "score não importa" (Meta interpreta como enganoso)
-  ❌ NUNCA use: urgência falsa — "só hoje", "últimas vagas", "expira em X horas"
-  ❌ NUNCA use: antes/depois financeiro ("estava endividado, agora tenho R$50k")
-  ✅ PODE usar: "processo de análise diferente dos bancos tradicionais"
-  ✅ PODE usar: "muitos clientes com histórico restrito conseguiram aprovação"
-  ✅ PODE usar: "análise humanizada, não só pelo score"
-  ✅ PODE usar: números reais e verificáveis com disclaimer "resultados podem variar"
-
-SAÚDE / FITNESS:
-  ❌ NUNCA use: "perca X kg em Y dias", "resultado garantido"
-  ❌ NUNCA use: imagens de before/after com claims de tempo específico
-  ✅ PODE usar: "muitos clientes relatam resultados em semanas"
-  ✅ PODE usar: depoimentos reais com nome e consentimento
-
-BELEZA / ESTÉTICA:
-  ❌ NUNCA use: claims médicos sem laudo ("elimina gordura", "cura")
-  ✅ PODE usar: "aparência mais firme", "pele com mais viço"
-
-━━━ ALGORITMO / SHADOWBAN ━━━
-
-Palavras que derrubam alcance orgânico (evite mesmo em post orgânico):
-  ❌ "siga", "curta", "compartilhe" em excesso — reduz alcance
-  ❌ Emojis em excesso (mais de 5 por parágrafo)
-  ❌ Links externos na legenda (Instagram penaliza)
-  ❌ Hashtags genéricas demais (#amor, #vida) junto com muitas de nicho
-  ✅ Máximo 10-15 hashtags, todas relevantes ao nicho
-  ✅ CTA natural: "salva esse post", "me conta nos comentários"
-  ✅ Hashtags no primeiro comentário > na legenda (debate em aberto, use com moderação)
-
-━━━ TIKTOK ━━━
-  ❌ Claims de resultado financeiro específico
-  ❌ Conteúdo que pareça anúncio não declarado (obrigado #publi ou #ad)
-  ✅ Narrativa UGC — mais tolerância para gatilhos emocionais
-  ✅ Tendências de áudio aumentam alcance mais que qualquer copy
+━━━ HASHTAGS ━━━
+  - 3 de nicho + 4 de comportamento + 3 de alcance + 2 de tendência
+  - Máximo 12, todas relevantes
 
 ━━━ REGRA GERAL ━━━
-  Antes de finalizar qualquer copy, pergunte:
-  1. Esse texto faz promessa absoluta que não pode ser garantida? → Suavize
-  2. Esse texto discrimina ou exclui grupos protegidos? → Reescreva
-  3. Esse texto usa urgência artificial? → Troque por escassez real ou consequência natural
-  4. Esse texto pode ser interpretado como enganoso por alguém mal-intencionado? → Ajuste
-  Se todas as respostas forem NÃO → pode publicar.
+  Se faz promessa absoluta → suavize
+  Se discrimina ou exclui → reescreva
+  Se usa urgência artificial → troque por consequência natural
 """
-
 
 # ============================================================
 # SCROLL-STOP VISUAL
 # ============================================================
 _SCROLL_STOP_VISUALS = """
-PSICOLOGIA DO VISUAL QUE PARA O SCROLL:
-
-1. EMOÇÃO VISÍVEL — rostos com emoção forte (choque, alívio, raiva, esperança)
-   ❌ "person holding credit card"
-   ✅ "shocked young man staring at phone screen with credit card, dim dramatic light"
-
-2. TENSÃO OU CONTRASTE — conflito visual (claro vs escuro, riqueza vs pobreza)
-   ❌ "woman at the gym"
-   ✅ "exhausted woman sitting on gym floor head down, single spotlight"
-
-3. MOMENTO CAPTURADO — não pose estática, parece vida real
-   ❌ "businessman smiling at camera"
-   ✅ "man running out of bank looking desperate, motion blur background"
-
+PSICOLOGIA DO VISUAL SCROLL-STOP:
+1. EMOÇÃO VISÍVEL — rostos com emoção forte (choque, alívio, raiva)
+2. TENSÃO OU CONTRASTE — conflito visual (claro vs escuro)
+3. MOMENTO CAPTURADO — vida real, não pose estática
 4. CLOSE-UP OU ÂNGULO INCOMUM
-   ❌ "pile of money"
-   ✅ "extreme close-up of crumpled bills on dark floor, one coin shining"
-
-5. IDENTIFICAÇÃO IMEDIATA — cena que o público reconhece como a própria vida
-   ❌ "family at dinner"
-   ✅ "couple arguing over bills on kitchen table at night, stressed expressions"
-
+5. IDENTIFICAÇÃO IMEDIATA — cena que o público reconhece
 6. PARA VÍDEO: movimento real, não pose
-   ❌ "city skyline"
-   ✅ "timelapse busy city street night neon lights reflecting wet pavement"
 
 REGRA: se a cena não faria parar o dedo no scroll, reescreva.
 """
 
 
 # ============================================================
-# SYSTEM PROMPT MASTER
+# SYSTEM PROMPT
 # ============================================================
 _SYSTEM = """\
-Você é um dos melhores copywriters e estrategistas de conteúdo do Brasil.
+Você é um dos melhores copywriters e estrategistas de conteúdo do Brasil, \
+calibrado pela metodologia BrandsDecoded — a conta que saiu do zero para \
+272 mil seguidores em 14 meses, 100% orgânico, 100% carrossel.
 
-Sua especialidade é criar conteúdo que converte — carrosseis e Reels que param o scroll,
-geram identificação imediata e levam à ação — respeitando os limites das plataformas.
+Cada headline passa por um filtro de 1.168 posts analisados. \
+Você conhece os 56 hooks que ultrapassaram 10k likes e os padrões exatos que viralizam.
 
-Você conhece as políticas do Meta, Instagram, TikTok e Google melhor do que a maioria dos
-profissionais de marketing. Você sabe exatamente onde está a linha e joga rente a ela,
-sem nunca cruzar — porque copywriter banido não fatura.
-
-Você entende que gatilho emocional não é manipulação — é falar a verdade de um jeito que
-ressoa. O segredo é a especificidade: quanto mais específico e verdadeiro, mais poderoso
-e mais seguro para as plataformas.
-
-Suas regras pessoais:
-- Nunca prometa o que não pode ser garantido
-- Nunca invente números — use os reais ou use linguagem qualitativa
-- Nunca use urgência artificial — use consequência natural
-- Sempre escreva como se um advogado e um cliente fossem ler juntos
-- O copy mais seguro é o copy mais verdadeiro
+Regras absolutas:
+- Nunca inventar dados, fontes, estatísticas
+- Nunca gerar conteúdo motivacional vazio ou AI slop
+- Tom jornalístico — como um repórter da Folha de S.Paulo
+- Artigos sempre presentes em todos os substantivos
+- Conectivos naturais em cada bloco
+- Zero estruturas binárias ("não é X, é Y", "menos X, mais Y", "sem X. sem Y.")
+- Zero cacoetes de IA ("e isso muda tudo", "no fim das contas", "ao final do dia")
+- Dados sempre com número + fonte + ano
+- Headlines IC (1-5): DEVEM ter dois-pontos separando reenquadramento de hook
+- Headlines NM (6-10): DEVEM ter EXATAMENTE 3 frases com ponto
+- Qualquer headline que não seguir o formato → reescrever antes de entregar
+- Headlines reprovadas nunca chegam ao usuário — total entregue sempre = 10 aprovadas
 
 SEMPRE retorne JSON válido — sem texto extra, sem markdown.
 """
 
 
 # ============================================================
-# DATACLASS
+# DATACLASSES
 # ============================================================
+@dataclass
+class HeadlineOption:
+    number: int
+    headline: str
+    triggers: list[str]
+    format_type: str    # "IC" or "NM"
+
+
+@dataclass
+class HeadlineResult:
+    triagem: str
+    eixo: str
+    funil: str
+    headlines: list[HeadlineOption]
+
+
 @dataclass
 class CopyResult:
     formula: str
@@ -228,20 +240,26 @@ class CopyResult:
     hashtags: list[str]
     image_query: str
     video_query: str
-    compliance_flags: list[str] = field(default_factory=list)  # alertas de compliance
+    compliance_flags: list[str] = field(default_factory=list)
 
 
 # ============================================================
-# GENERATE
+# GENERATE HEADLINES — 10 options
 # ============================================================
-def generate(topic: str, brand: BrandProfile, creator_style=None) -> CopyResult:
+def generate_headlines(
+    topic: str,
+    brand: BrandProfile,
+    creator_style=None,
+    research_data: str = "",
+) -> HeadlineResult:
     """
+    Generate 10 headlines using Designer AI methodology.
+    5 Investigação Cultural + 5 Narrativa Magnética.
+
     Parameters
     ----------
-    creator_style : CreatorStyle | None
-        Estilo extraído de um criador de referência (via creator_style.py).
-        Quando fornecido, injeta o bloco de estilo no prompt para a legenda
-        soar com a voz do criador adaptada ao nicho.
+    research_data : dados da pesquisa Tavily (TopicResearch formatado).
+                    Quando fornecido, as headlines DEVEM usar esses dados.
     """
     client = Anthropic()
 
@@ -251,12 +269,134 @@ NICHO: {brand.subniche}
 TOM DE VOZ: {brand.tone}
 PILARES: {", ".join(brand.content_pillars)}
 PÚBLICO: {brand.audience.description} ({brand.audience.age_range})
-DORES DO PÚBLICO: {" | ".join(brand.audience.pains)}
-LINGUAGEM DO PÚBLICO: {" | ".join(brand.audience.language)}
+DORES: {" | ".join(brand.audience.pains)}
+LINGUAGEM: {" | ".join(brand.audience.language)}
 HANDLE: {brand.handle or "@" + brand.slug}
 """
 
-    # Bloco de estilo do criador (opcional)
+    creator_block = ""
+    if creator_style is not None:
+        from designer.research.creator_style import style_to_prompt_block
+        creator_block = style_to_prompt_block(creator_style)
+
+    research_block = ""
+    if research_data:
+        research_block = f"""
+━━━ DADOS DA PESQUISA (OBRIGATÓRIO USAR NAS HEADLINES) ━━━
+{research_data}
+
+REGRA CRÍTICA: As headlines DEVEM conter dados, números, nomes ou fenômenos da pesquisa acima.
+Headlines genéricas que existiriam SEM esses dados são automaticamente reprovadas.
+"""
+
+    prompt = f"""
+TEMA DO POST: {topic}
+
+PERFIL DA MARCA:
+{brand_context}
+
+━━━ FORMATOS DE HEADLINE ━━━
+{_HEADLINE_FORMATS}
+
+━━━ PADRÕES DE LIFT E GATILHOS ━━━
+{_LIFT_PATTERNS}
+
+━━━ CHECKLIST DE REJEIÇÃO ━━━
+{_REJECTION_CHECKLIST}
+
+━━━ ANTI-AI SLOP ━━━
+{_ANTI_AI_SLOP}
+{creator_block}
+{research_block}
+
+━━━ TAREFA ━━━
+
+PASSO 1 — TRIAGEM:
+Analise o tema (e os dados da pesquisa, se fornecidos) e extraia:
+- Transformação central (o que mudou)
+- Fricção (a tensão real)
+- Ângulo narrativo dominante
+- Classifique: Eixo (Mercado/Cases/Notícias/Cultura/Produto) e Funil (Topo/Meio/Fundo)
+
+PASSO 2 — HEADLINES:
+Gere exatamente 10 headlines:
+- Headlines 1-5: formato Investigação Cultural (IC) — OBRIGATÓRIO ter dois-pontos
+- Headlines 6-10: formato Narrativa Magnética (NM) — OBRIGATÓRIO ter 3 frases com ponto
+- Cada headline deve ter pelo menos 2 gatilhos emocionais
+- Cada headline deve ter pelo menos 1 padrão de lift positivo
+- Distribuição: 1.Reenquadramento 2.Conflito oculto 3.Implicação sistêmica 4.Contradição 5.Ameaça/oportunidade 6.Nomeação 7.Diagnóstico cultural 8.Inversão 9.Ambição de mercado 10.Mecanismo social
+
+PASSO 3 — VALIDAÇÃO:
+Rode CADA headline pelo checklist de rejeição. Se falhar, reescreva antes de entregar.
+
+Retorne SOMENTE este JSON:
+{{
+  "triagem": "1 frase com o ângulo central extraído",
+  "eixo": "Mercado|Cases|Notícias|Cultura|Produto",
+  "funil": "Topo|Meio|Fundo",
+  "headlines": [
+    {{
+      "number": 1,
+      "headline": "headline completa aqui",
+      "triggers": ["Curiosidade", "Identidade"],
+      "format_type": "IC"
+    }},
+    ...mais 9 headlines...
+  ]
+}}
+"""
+
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=4000,
+        system=_SYSTEM,
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    raw = response.content[0].text.strip()
+    raw = re.sub(r"^```(?:json)?\s*", "", raw)
+    raw = re.sub(r"\s*```$", "", raw)
+    data = json.loads(raw.strip())
+
+    headlines = [
+        HeadlineOption(
+            number=h["number"],
+            headline=h["headline"],
+            triggers=h.get("triggers", []),
+            format_type=h.get("format_type", "IC" if h["number"] <= 5 else "NM"),
+        )
+        for h in data.get("headlines", [])
+    ]
+
+    return HeadlineResult(
+        triagem=data.get("triagem", ""),
+        eixo=data.get("eixo", "Cultura"),
+        funil=data.get("funil", "Topo"),
+        headlines=headlines,
+    )
+
+
+# ============================================================
+# GENERATE COPY — full post (backward compatible)
+# ============================================================
+def generate(topic: str, brand: BrandProfile, creator_style=None) -> CopyResult:
+    """
+    Generate complete copy for a post. Backward compatible with v4.
+    Uses enhanced Designer AI methodology internally.
+    """
+    client = Anthropic()
+
+    brand_context = f"""
+MARCA: {brand.client_name}
+NICHO: {brand.subniche}
+TOM DE VOZ: {brand.tone}
+PILARES: {", ".join(brand.content_pillars)}
+PÚBLICO: {brand.audience.description} ({brand.audience.age_range})
+DORES: {" | ".join(brand.audience.pains)}
+LINGUAGEM: {" | ".join(brand.audience.language)}
+HANDLE: {brand.handle or "@" + brand.slug}
+"""
+
     creator_block = ""
     if creator_style is not None:
         from designer.research.creator_style import style_to_prompt_block
@@ -268,13 +408,16 @@ TEMA DO POST: {topic}
 PERFIL DA MARCA:
 {brand_context}
 
-━━━ FÓRMULAS DE HEADLINE ━━━
-{_FORMULAS}
+━━━ FORMATOS DE HEADLINE ━━━
+{_HEADLINE_FORMATS}
 
-━━━ GATILHOS PSICOLÓGICOS PERMITIDOS ━━━
-{_TRIGGERS}
+━━━ PADRÕES DE LIFT ━━━
+{_LIFT_PATTERNS}
 
-━━━ COMPLIANCE — REGRAS DE PLATAFORMA ━━━
+━━━ ANTI-AI SLOP ━━━
+{_ANTI_AI_SLOP}
+
+━━━ COMPLIANCE ━━━
 {_COMPLIANCE}
 
 ━━━ VISUAL SCROLL-STOP ━━━
@@ -283,45 +426,38 @@ PERFIL DA MARCA:
 
 ━━━ TAREFA ━━━
 
-Gere o copy completo para este post. Siga esta ordem mental:
+Gere o copy completo para este post:
 
 PASSO 1 — HEADLINE:
-- Escolha a fórmula mais adequada ao tema e às dores do público
-- Use pelo menos 2 gatilhos da lista — no limite, sem cruzar
-- Seja específico ao nicho — generalidade não converte
-- Parte 1: setup (máx 6 palavras) | Parte 2: virada (máx 7 palavras)
+- Use formato Investigação Cultural: [Reenquadramento]: [Hook]
+- Mínimo 2 gatilhos emocionais
+- Mínimo 1 padrão de lift positivo
+- Parte 1: setup (máx 8 palavras) | Parte 2: virada (máx 8 palavras)
 
 PASSO 2 — LEGENDA:
-- Parágrafo 1: dor ou situação que o público vive (identificação)
-- Parágrafo 2: revelação ou dado que muda a perspectiva
-- Parágrafo 3: prova ou lógica que sustenta
-- Parágrafo 4: próximo passo natural (não grite, guie)
-- Tom: conversa entre iguais — não palestra, não anúncio
-- Frases curtas. Respiração entre parágrafos. Máx 3 linhas por parágrafo.
+- Parágrafo 1: dor ou situação (identificação)
+- Parágrafo 2: revelação ou dado
+- Parágrafo 3: prova ou lógica
+- Parágrafo 4: próximo passo natural
+- Tom: conversa entre iguais, tom jornalístico
+- Sem estruturas binárias, sem cacoetes de IA
 
-PASSO 3 — COMPLIANCE CHECK:
-- Releia tudo e identifique qualquer frase problemática
-- Se encontrar, reescreva ANTES de retornar
-- Liste em compliance_flags qualquer ponto que merece atenção do cliente
+PASSO 3 — COMPLIANCE CHECK
 
-PASSO 4 — HASHTAGS:
-- 3 de nicho específico + 4 de comportamento + 3 de alcance + 2 de tendência
-- Todas relevantes — sem encher de genérico
+PASSO 4 — HASHTAGS (3 nicho + 4 comportamento + 3 alcance + 2 tendência)
 
-PASSO 5 — QUERIES VISUAIS:
-- image_query: foto scroll-stop em inglês (5-9 palavras)
-- video_query: cena com movimento em inglês (5-9 palavras)
+PASSO 5 — QUERIES VISUAIS (inglês, 5-9 palavras cada)
 
 Retorne SOMENTE este JSON:
 {{
-  "formula": "F1|F2|F3|F4",
+  "formula": "IC|NM",
   "headline_part1": "SETUP EM CAIXA ALTA",
   "headline_part2": "VIRADA EM CAIXA ALTA",
-  "caption": "Legenda completa pronta para publicar",
+  "caption": "Legenda completa",
   "hashtags": ["#hashtag1", "#hashtag2"],
   "image_query": "scroll-stopping photo scene in english",
-  "video_query": "scroll-stopping video scene with movement in english",
-  "compliance_flags": ["alerta 1 se houver", "alerta 2 se houver"]
+  "video_query": "scroll-stopping video scene in english",
+  "compliance_flags": ["alerta 1 se houver"]
 }}
 """
 

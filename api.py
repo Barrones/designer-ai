@@ -84,6 +84,32 @@ class AdsRequest(BaseModel):
     accent_color: str = "#00D4FF"
 
 
+class Html5AdsRequest(BaseModel):
+    headline1: str
+    headline2: str
+    cta: str = "Saiba mais"
+    brand_name: str = "Brand"
+    niche: str = ""
+    accent_color: str = "#00D4FF"
+    lang: str = "pt"
+    sizes: Optional[list[str]] = None
+
+
+class ResearchRequest(BaseModel):
+    brand_slug: str
+    niche: str = ""
+    country: str = "BR"
+    count: int = 5
+
+
+class SocialPostRequest(BaseModel):
+    brand_slug: str
+    image_urls: list[str] = []
+    video_url: Optional[str] = None
+    caption: str = ""
+    hashtags: list[str] = []
+
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _make_output_dir(brand_slug: str) -> str:
@@ -289,6 +315,240 @@ def render_ads(req: AdsRequest):
             "google_copy": ads.google_copy,
             "meta_copy": ads.meta_copy,
             "drive_urls": drive_urls,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/generate/html5")
+def generate_html5(req: Html5AdsRequest):
+    """Gera pacote de banners HTML5 standalone (sem precisar de carrossel/capa)."""
+    try:
+        from designer.delivery.html5_ads import generate_html5_pack, SIZES, DEFAULT_SIZES
+        from designer.copy.headlines import CopyResult
+
+        copy = CopyResult(
+            formula="direct",
+            headline_part1=req.headline1,
+            headline_part2=req.headline2,
+            caption="",
+            hashtags=[],
+            image_query="",
+            video_query="",
+            compliance_flags=[],
+        )
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_dir = os.path.join("output", f"html5_{ts}")
+        os.makedirs(output_dir, exist_ok=True)
+
+        zips = generate_html5_pack(
+            copy_result=copy,
+            brand_name=req.brand_name,
+            niche=req.niche,
+            accent_color=req.accent_color,
+            cta_text=req.cta,
+            output_dir=output_dir,
+            sizes=req.sizes,
+            lang=req.lang,
+        )
+
+        return {
+            "ok": True,
+            "output_dir": output_dir,
+            "zips": zips,
+            "total": len(zips),
+            "sizes_used": req.sizes or DEFAULT_SIZES,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/html5/sizes")
+def list_html5_sizes():
+    """Lista todos os formatos de banner HTML5 disponíveis."""
+    from designer.delivery.html5_ads import SIZES, DEFAULT_SIZES
+    return {
+        "sizes": {k: {"width": v[0], "height": v[1]} for k, v in SIZES.items()},
+        "defaults": DEFAULT_SIZES,
+    }
+
+
+# ── Research ──────────────────────────────────────────────────────────────────
+
+@app.post("/research/topics")
+def research_topics(req: ResearchRequest):
+    """Pesquisa tendências do nicho e retorna temas para posts automaticamente."""
+    try:
+        from designer.research.brand_intel import research_brand
+        from designer.brand.profile import BrandProfile
+
+        niche = req.niche
+        brand_name = req.brand_slug
+        try:
+            brand = BrandProfile.load(req.brand_slug)
+            niche = niche or brand.subniche or brand.niche or ""
+            brand_name = brand.client_name or req.brand_slug
+        except Exception:
+            pass
+
+        if not niche:
+            raise HTTPException(status_code=400, detail="Informe o nicho ou tenha um perfil salvo")
+
+        intel = research_brand(
+            brand_name=brand_name,
+            niche=niche,
+            country=req.country,
+        )
+
+        return {
+            "ok": True,
+            "topics": intel.topic_suggestions[:req.count],
+            "trends": intel.trends,
+            "pains": intel.pains,
+            "angles": intel.angles,
+            "tone": intel.tone,
+            "total": len(intel.topic_suggestions),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Social Media Posting ──────────────────────────────────────────────────────
+
+@app.post("/social/post")
+def social_post(req: SocialPostRequest):
+    """
+    Posta conteúdo no Instagram via instagrapi (login com usuário/senha).
+
+    Requer variáveis de ambiente:
+      IG_USERNAME  — usuário do Instagram
+      IG_PASSWORD  — senha do Instagram
+    """
+    from instagrapi import Client as IGClient
+    from instagrapi.exceptions import LoginRequired
+    import tempfile
+    import urllib.request as _urllib
+
+    username = os.getenv("IG_USERNAME", "")
+    password = os.getenv("IG_PASSWORD", "")
+
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="IG_USERNAME e IG_PASSWORD são obrigatórios")
+
+    full_caption = req.caption
+    if req.hashtags:
+        full_caption += "\n\n" + " ".join(req.hashtags)
+
+    # Login (reutiliza sessão se existir)
+    session_path = Path(f"/tmp/ig_session_{username}.json")
+    cl = IGClient()
+    cl.delay_range = [1, 3]
+
+    try:
+        if session_path.exists():
+            cl.load_settings(session_path)
+            cl.login(username, password)
+        else:
+            cl.login(username, password)
+        cl.dump_settings(session_path)
+    except LoginRequired:
+        cl.login(username, password)
+        cl.dump_settings(session_path)
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Falha no login do Instagram: {e}")
+
+    try:
+        # Baixa imagens/vídeo de URLs para arquivos temporários
+        def _download(url: str, suffix: str) -> Path:
+            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+            _urllib.urlretrieve(url, tmp.name)
+            return Path(tmp.name)
+
+        if req.image_urls:
+            if len(req.image_urls) == 1:
+                # Post único
+                img = _download(req.image_urls[0], ".jpg")
+                media = cl.photo_upload(img, full_caption)
+                img.unlink(missing_ok=True)
+                return {"ok": True, "id": media.pk, "code": media.code, "type": "single"}
+            else:
+                # Carousel (álbum)
+                imgs = [_download(url, ".jpg") for url in req.image_urls[:10]]
+                media = cl.album_upload(imgs, full_caption)
+                for p in imgs:
+                    p.unlink(missing_ok=True)
+                return {"ok": True, "id": media.pk, "code": media.code, "type": "carousel"}
+
+        elif req.video_url:
+            # Reel
+            vid = _download(req.video_url, ".mp4")
+            media = cl.clip_upload(vid, full_caption)
+            vid.unlink(missing_ok=True)
+            return {"ok": True, "id": media.pk, "code": media.code, "type": "reel"}
+        else:
+            raise HTTPException(status_code=400, detail="Envie image_urls ou video_url")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Autopilot ─────────────────────────────────────────────────────────────────
+
+@app.post("/autopilot/trigger")
+def autopilot_trigger(req: CopyRequest):
+    """Endpoint para o n8n autopilot: gera copy + carrossel + vídeo + ads de uma vez."""
+    try:
+        from designer.brand.profile import BrandProfile
+
+        brand = BrandProfile.load(req.brand_slug)
+
+        # 1 — Gerar copy
+        copy_resp = generate_copy(req)
+        if not copy_resp.get("ok"):
+            raise HTTPException(status_code=500, detail="Falha ao gerar copy")
+
+        output_dir = _make_output_dir(req.brand_slug)
+
+        # 2 — Carrossel
+        carousel_resp = render_carousel(CarouselRequest(
+            brand_slug=req.brand_slug,
+            output_dir=output_dir,
+            copy=copy_resp,
+        ))
+
+        # 3 — Vídeo
+        video_resp = render_video(VideoRequest(
+            brand_slug=req.brand_slug,
+            output_dir=output_dir,
+            copy=copy_resp,
+        ))
+
+        # 4 — Ads (se tem capa)
+        ads_resp = None
+        if carousel_resp.get("ok") and carousel_resp.get("cover_path"):
+            ads_resp = render_ads(AdsRequest(
+                brand_slug=req.brand_slug,
+                brand_name=brand.client_name,
+                niche=brand.subniche or "",
+                output_dir=output_dir,
+                copy=copy_resp,
+                cover_image_path=carousel_resp["cover_path"],
+                video_path=video_resp.get("video_path"),
+            ))
+
+        return {
+            "ok": True,
+            "output_dir": output_dir,
+            "copy": copy_resp,
+            "carousel": carousel_resp,
+            "video": video_resp,
+            "ads": ads_resp,
+            "generated_at": datetime.now().isoformat(),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

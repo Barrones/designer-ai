@@ -86,7 +86,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8000/copy",
+        "url": "={{ $env.DESIGNER_API_URL || 'http://localhost:8000' }}/copy",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -139,7 +139,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8000/render/carousel",
+        "url": "={{ $env.DESIGNER_API_URL || 'http://localhost:8000' }}/render/carousel",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -182,7 +182,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8000/render/video",
+        "url": "={{ $env.DESIGNER_API_URL || 'http://localhost:8000' }}/render/video",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -235,7 +235,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8000/render/ads",
+        "url": "={{ $env.DESIGNER_API_URL || 'http://localhost:8000' }}/render/ads",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

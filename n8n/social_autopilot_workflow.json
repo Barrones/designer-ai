@@ -1,0 +1,632 @@
+{
+  "name": "Designer AI — Social Media Autopilot [TEMPLATE]",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9,13,17 * * *"
+            }
+          ]
+        }
+      },
+      "id": "node-schedule",
+      "name": "⏰ Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        180,
+        400
+      ],
+      "notes": "3 posts por dia: 9h, 13h, 17h.\nPara ajustar: mude o cron.\nExemplos:\n  0 9,12,15,18 * * *  → 4x/dia\n  0 9,11,13,16,19 * * * → 5x/dia\n  0 9,13,17 * * *     → 3x/dia"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "autopilot-trigger",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "🔗 Webhook (manual)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        180,
+        600
+      ],
+      "webhookId": "autopilot-trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ══════════════════════════════════════════════════════════════════\n// CONFIGURAÇÃO DO CLIENTE — edite ao duplicar o workflow\n// ══════════════════════════════════════════════════════════════════\nconst CLIENT = {\n  api_url: 'https://interconvertible-submolecular-irena.ngrok-free.dev',  // URL da API via ngrok\n  brand_slug: 'legado-viking',       // slug do brand_profiles/*.json\n  brand_name: 'Legado Viking • Runas Ancestrais',\n  niche: 'cultura viking, runas nórdicas, mitologia nórdica e simbolismo ancestral',\n  country: 'BR',                     // BR, US, IT, ES, DE, FR, MX, PT, UK\n  cta: 'Descubra seu legado',\n  content_type: 'carousel',              // carousel | video | both\n  creator: '',                       // estilo de criador (vazio = sem)\n  duration: 15,                      // duração do vídeo (seg)\n  auto_post: true,                   // true = posta no Instagram, false = só gera\n};\n\nreturn CLIENT;"
+      },
+      "id": "node-client-config",
+      "name": "⚙️ Config do Cliente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config do Cliente').item.json.api_url }}/research/topics",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "ngrok-skip-browser-warning",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, niche: $json.niche, country: $json.country, count: 5 }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "node-research",
+      "name": "🔍 Pesquisar Tendências",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ══════════════════════════════════════════════════════════════════\n// ROTAÇÃO INTELIGENTE DE TEMAS\n// Pega temas frescos da pesquisa + rotaciona em ordem circular\n// ══════════════════════════════════════════════════════════════════\nconst config = $('⚙️ Config do Cliente').item.json;\nconst research = $input.item.json;\n\nif (!research.ok) {\n  throw new Error('Pesquisa falhou: ' + JSON.stringify(research));\n}\n\n// Combina temas da pesquisa (frescos) com ângulos\nconst allTopics = [\n  ...(research.topics || []),\n  ...(research.angles || []).map(a => a),\n];\n\nif (allTopics.length === 0) {\n  throw new Error('Nenhum tema encontrado para o nicho: ' + config.niche);\n}\n\n// Rotação circular\nconst staticData = $getWorkflowStaticData('global');\nlet idx = staticData.topicIndex || 0;\nif (idx >= allTopics.length) idx = 0;\nconst topic = allTopics[idx];\nstaticData.topicIndex = idx + 1;\n\nconst ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);\n\nreturn {\n  ...config,\n  topic,\n  topic_index: idx,\n  total_topics: allTopics.length,\n  trends: research.trends || [],\n  pains: research.pains || [],\n  tone: research.tone || '',\n  output_dir: `output/${config.brand_slug}_${ts}`,\n  execution_id: ts,\n};"
+      },
+      "id": "node-pick-topic",
+      "name": "🎯 Escolher Tema (rotação)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config do Cliente').item.json.api_url }}/copy",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "ngrok-skip-browser-warning",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, topic: $json.topic, creator: $json.creator || undefined }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "node-copy",
+      "name": "✍️ Gerar Copy",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const copy = $input.item.json;\nconst vars = $('🎯 Escolher Tema (rotação)').item.json;\n\nif (!copy.ok) {\n  throw new Error('Copy falhou: ' + JSON.stringify(copy));\n}\n\nreturn {\n  brand_slug: vars.brand_slug,\n  brand_name: vars.brand_name,\n  niche: vars.niche,\n  output_dir: vars.output_dir,\n  cta: vars.cta,\n  content_type: vars.content_type,\n  duration: vars.duration,\n  topic: vars.topic,\n  auto_post: vars.auto_post,\n  copy: {\n    formula: copy.formula,\n    headline_part1: copy.headline_part1,\n    headline_part2: copy.headline_part2,\n    caption: copy.caption,\n    hashtags: copy.hashtags,\n    image_query: copy.image_query,\n    video_query: copy.video_query,\n    compliance_flags: copy.compliance_flags\n  },\n  has_compliance_flags: (copy.compliance_flags ?? []).length > 0,\n  compliance_summary: (copy.compliance_flags ?? []).join(' | ')\n};"
+      },
+      "id": "node-merge",
+      "name": "Montar payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-carousel",
+              "leftValue": "={{ $json.content_type }}",
+              "rightValue": "video",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-carousel",
+      "name": "Tem Carrossel?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1580,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config do Cliente').item.json.api_url }}/render/carousel",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "ngrok-skip-browser-warning",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, output_dir: $json.output_dir, copy: $json.copy }) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "node-carousel",
+      "name": "🖼️ Carrossel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1800,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-video",
+              "leftValue": "={{ $json.content_type }}",
+              "rightValue": "carousel",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-video",
+      "name": "Tem Vídeo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1580,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config do Cliente').item.json.api_url }}/render/video",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "ngrok-skip-browser-warning",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, output_dir: $json.output_dir, copy: $json.copy, cta: $json.cta, duration: $json.duration }) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "node-video",
+      "name": "🎬 Vídeo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1800,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Consolida resultados de carrossel e/ou vídeo\nconst vars = $('Montar payload').item.json;\n\nlet cover_path = null;\nlet video_path = null;\nlet slide_paths = [];\nlet drive_urls = [];\n\n// Tenta ler carrossel (pode não ter executado)\ntry {\n  const c = $('🖼️ Carrossel').item.json;\n  if (c && c.ok) {\n    cover_path = c.cover_path;\n    slide_paths = c.slide_paths ?? [];\n    drive_urls = drive_urls.concat(c.drive_urls ?? []);\n  }\n} catch(e) {\n  // Carrossel não executou — OK\n}\n\n// Tenta ler vídeo (pode não ter executado)\ntry {\n  const v = $('🎬 Vídeo').item.json;\n  if (v && v.ok) {\n    video_path = v.video_path;\n    drive_urls = drive_urls.concat(v.drive_urls ?? []);\n  }\n} catch(e) {\n  // Vídeo não executou — OK\n}\n\nreturn {\n  ...vars,\n  cover_path,\n  video_path,\n  slide_paths,\n  drive_urls,\n};"
+      },
+      "id": "node-consolidate",
+      "name": "Consolidar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2040,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const vars = $('Consolidar').item.json;\nconst copy = vars.copy;\n\n// Monta URLs públicas das imagens (do Drive)\nconst image_urls = (vars.drive_urls || []).filter(u => u && !u.includes('mp4'));\nconst video_url = (vars.drive_urls || []).find(u => u && u.includes('mp4')) || null;\n\nreturn {\n  ok: true,\n  brand: vars.brand_slug,\n  brand_name: vars.brand_name,\n  niche: vars.niche,\n  topic: vars.topic,\n  output_dir: vars.output_dir,\n  headline: copy.headline_part1 + ' ' + copy.headline_part2,\n  caption: copy.caption,\n  hashtags: copy.hashtags,\n  cover_path: vars.cover_path,\n  video_path: vars.video_path,\n  slide_paths: vars.slide_paths,\n  drive_urls: vars.drive_urls,\n  image_urls,\n  video_url,\n  auto_post: vars.auto_post,\n  compliance_flags: vars.compliance_summary,\n  generated_at: new Date().toISOString()\n};"
+      },
+      "id": "node-final",
+      "name": "📊 Resultado Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2700,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "cond-auto-post",
+              "leftValue": "={{ $json.auto_post }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-has-urls",
+              "leftValue": "={{ ($json.image_urls ?? []).length }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-post",
+      "name": "Auto-publicar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2920,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config do Cliente').item.json.api_url }}/social/post",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "ngrok-skip-browser-warning",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand, image_urls: $json.image_urls, video_url: $json.video_url, caption: $json.caption, hashtags: $json.hashtags }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "node-social-post",
+      "name": "📱 Publicar no Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3160,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('📊 Resultado Final').item.json;\n\nconst msg = [\n  d.auto_post ? '📱 PUBLICADO!' : '📦 GERADO!',\n  `Brand: ${d.brand_name}`,\n  `Tema: ${d.topic}`,\n  `Headline: ${d.headline}`,\n  `Slides: ${(d.slide_paths ?? []).length}`,\n  `Vídeo: ${d.video_path ? '✅' : '—'}`,\n  `Ads: ${d.ads?.report_path ? '✅' : '—'}`,\n  `Auto-post: ${d.auto_post ? '✅ Instagram' : '❌ Desligado'}`,\n  d.drive_urls?.[0] ? `Drive: ${d.drive_urls[0]}` : '',\n  d.generated_at,\n].filter(Boolean).join('\\n');\n\nconsole.log(msg);\nreturn { notification: msg };"
+      },
+      "id": "node-discord",
+      "name": "📨 Notificação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3160,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('📊 Resultado Final').item.json;\nlet social = {};\ntry { social = $('📱 Publicar no Instagram').item.json; } catch(e) {}\n\nreturn {\n  timestamp: d.generated_at,\n  brand: d.brand,\n  topic: d.topic,\n  headline: d.headline,\n  carousel: (d.slide_paths ?? []).length > 0,\n  video: !!d.video_path,\n  ads: !!d.ads?.report_path,\n  auto_posted: d.auto_post,\n  social_results: social,\n  drive_urls: d.drive_urls || [],\n};"
+      },
+      "id": "node-log",
+      "name": "📋 Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3380,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "⏰ Schedule": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Config do Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔗 Webhook (manual)": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Config do Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚙️ Config do Cliente": {
+      "main": [
+        [
+          {
+            "node": "🔍 Pesquisar Tendências",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Pesquisar Tendências": {
+      "main": [
+        [
+          {
+            "node": "🎯 Escolher Tema (rotação)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 Escolher Tema (rotação)": {
+      "main": [
+        [
+          {
+            "node": "✍️ Gerar Copy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✍️ Gerar Copy": {
+      "main": [
+        [
+          {
+            "node": "Montar payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar payload": {
+      "main": [
+        [
+          {
+            "node": "Tem Carrossel?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Tem Vídeo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Carrossel?": {
+      "main": [
+        [
+          {
+            "node": "🖼️ Carrossel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consolidar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🖼️ Carrossel": {
+      "main": [
+        [
+          {
+            "node": "Consolidar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Vídeo?": {
+      "main": [
+        [
+          {
+            "node": "🎬 Vídeo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consolidar",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "🎬 Vídeo": {
+      "main": [
+        [
+          {
+            "node": "Consolidar",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Consolidar": {
+      "main": [
+        [
+          {
+            "node": "📊 Resultado Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Resultado Final": {
+      "main": [
+        [
+          {
+            "node": "Auto-publicar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-publicar?": {
+      "main": [
+        [
+          {
+            "node": "📱 Publicar no Instagram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📨 Notificação",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📋 Log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📨 Notificação",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📋 Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📱 Publicar no Instagram": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": {
+    "global": {
+      "topicIndex": 0
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "designer-ai-social-autopilot"
+  },
+  "tags": [
+    {
+      "id": "tag-1",
+      "name": "autopilot"
+    },
+    {
+      "id": "tag-2",
+      "name": "social-media"
+    },
+    {
+      "id": "tag-3",
+      "name": "ai"
+    }
+  ]
+}

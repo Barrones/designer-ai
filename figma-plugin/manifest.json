@@ -1,0 +1,14 @@
+{
+  "name": "Designer AI",
+  "id": "1545470893748672026",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "networkAccess": {
+    "allowedDomains": ["https://fonts.googleapis.com", "https://fonts.gstatic.com"]
+  }
+}

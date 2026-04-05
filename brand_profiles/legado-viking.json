@@ -1,0 +1,122 @@
+{
+  "slug": "legado-viking",
+  "client_name": "Legado Viking • Runas Ancestrais",
+  "niche": "cultura e história",
+  "subniche": "cultura viking, runas nórdicas, mitologia nórdica e simbolismo ancestral",
+  "product": "conteúdo educacional e espiritual sobre o legado viking",
+  "goal": "criar a maior comunidade brasileira de cultura viking autêntica, misturando história real com significado espiritual das runas",
+  "tone": "épico, sábio, misterioso — fala com autoridade histórica e profundidade espiritual, nunca genérico ou superficial",
+  "content_pillars": [
+    "história real viking — credibilidade",
+    "runas e simbolismo — curiosidade",
+    "significado profundo — retenção",
+    "engajamento — perguntas e provocações"
+  ],
+  "content_angles": [
+    "verdades históricas que ninguém conta sobre vikings",
+    "o significado oculto de cada runa",
+    "lições viking para a vida moderna",
+    "desmistificando mitos sobre vikings",
+    "rituais e tradições nórdicas reais",
+    "a sabedoria de Odin aplicada hoje"
+  ],
+  "suggested_formats": [
+    "carrossel",
+    "reels",
+    "single"
+  ],
+  "audience": {
+    "description": "homens e mulheres brasileiros interessados em mitologia nórdica, espiritualidade, história antiga e simbolismo ancestral",
+    "age_range": "20-45",
+    "pains": [
+      "conteúdo viking superficial e fakez",
+      "falta de fontes históricas confiáveis em português",
+      "confusão entre vikings reais e ficção de Hollywood",
+      "quer se conectar com ancestralidade mas não sabe como"
+    ],
+    "desires": [
+      "conhecer a história real",
+      "entender o significado das runas",
+      "se conectar com algo maior que si mesmo",
+      "ter conteúdo profundo pra salvar e compartilhar"
+    ],
+    "language": [
+      "qual runa te representa",
+      "significado das runas",
+      "vikings de verdade",
+      "sabedoria ancestral",
+      "legado nórdico",
+      "mitologia nórdica"
+    ]
+  },
+  "color_palette": {
+    "primary": "#1A1A2E",
+    "secondary": "#C4A35A",
+    "accent": "#8B0000",
+    "text": "#F0E6D3"
+  },
+  "typography": {
+    "headline": "Cinzel",
+    "body": "Lora"
+  },
+  "market_gaps": [
+    "90% do conteúdo viking no BR é superficial e estético sem substância",
+    "poucos perfis combinam história real com espiritualidade das runas",
+    "nicho com engajamento altíssimo mas pouca autoridade",
+    "comunidade faminta por conteúdo profundo em português"
+  ],
+  "competitor_patterns": [
+    "posts estéticos sem conteúdo real — só imagem bonita",
+    "copiam séries de TV e chamam de 'história viking'",
+    "foco em masculinidade tóxica usando vikings como símbolo",
+    "conteúdo genérico de mitologia sem aprofundamento nas runas"
+  ],
+
+  "creative_direction": {
+    "carousel": {
+      "style": "clássico com toque épico",
+      "mood": "misterioso, sombrio e grandioso — como um manuscrito antigo iluminado por fogo",
+      "visual_references": ["runas esculpidas em pedra", "florestas nórdicas com neblina", "longship no oceano tempestuoso", "manuscrito Viking"],
+      "forbidden": [
+        "estética de série de TV (Vikings, Ragnar estilizado)",
+        "vikings com capacete com chifres (historicamente incorreto)",
+        "fontes sem serifa modernas",
+        "paleta colorida ou vibrante"
+      ],
+      "slide_rhythm": "dark profundo na capa e hook, light envelhecido para dados históricos, gradient dourado para direção e CTA",
+      "accent_usage": "dourado (#C4A35A) apenas em runas, nomes próprios nórdicos e frases de sabedoria — nunca decorativo"
+    },
+    "video_reel": {
+      "scene_mood": "épico e místico — natureza escandinava selvagem, fogo, névoa, pedras rúnicas",
+      "footage_style": "cinematográfico lento, saturação baixa, contraste alto — clima de documentário histórico da BBC",
+      "forbidden_footage": [
+        "atores fantasiados de viking de série de TV",
+        "imagens coloridas e modernas de natureza genérica",
+        "pessoas sorridentes em contexto histórico",
+        "stock de escritório ou cidade"
+      ],
+      "text_position": "terço inferior com scrim escuro e bordas envelhecidas",
+      "overlay": "dark profundo com accent dourado nas palavras de maior peso histórico",
+      "pexels_queries": [
+        "viking age historical dark dramatic",
+        "norse mythology forest fog cinematic",
+        "ancient stone runes scandinavia",
+        "dramatic ocean storm nordic",
+        "fire torches dark historical atmosphere",
+        "snow mountains dramatic landscape scandinavia"
+      ],
+      "min_duration": 10,
+      "max_duration": 25
+    },
+    "motion_ad": {
+      "style": "épico dark — fundo quase preto com textura de pedra, texto em dourado envelhecido",
+      "animation": "texto surge lentamente como uma runa sendo esculpida, com reverberação final",
+      "use_when": "revelação de uma runa específica, evento de comunidade, lançamento de série de conteúdo",
+      "forbidden_animations": ["flash rápido", "efeitos neon", "transições de app moderno", "bounce ou elastic"],
+      "duration_seconds": 20,
+      "aspect_ratio": "9:16",
+      "copy_format": "revelação gradual: pergunta ancestral → silêncio → resposta histórica",
+      "remotion_template": "epic_reveal"
+    }
+  }
+}

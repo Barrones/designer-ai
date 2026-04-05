@@ -63,5 +63,52 @@
     "A maioria das marcas compete só em preço e frete grátis, sem construir nenhuma autoridade técnica ou identidade de comunidade"
   ],
   "handle": "@forceprotocol",
-  "created_at": ""
+  "created_at": "",
+
+  "creative_direction": {
+    "carousel": {
+      "style": "bold",
+      "mood": "dark, agressivo, técnico — sem suavidade",
+      "visual_references": ["academia underground", "atleta focado no espelho", "suplemento sobre bancada preta"],
+      "forbidden": [
+        "sorrisos forçados",
+        "academia vazia e iluminada",
+        "corpo perfeito de atleta profissional",
+        "linguagem de academia popular/fitness genérico"
+      ],
+      "slide_rhythm": "dark pesado na capa e hook, light para dados e provas, gradient no CTA",
+      "accent_usage": "verde-limão (#C8FF00) apenas em palavras-chave de impacto — nunca decorativo"
+    },
+    "video_reel": {
+      "scene_mood": "treino intenso, foco absoluto, suor real — sem glitter ou filtro",
+      "footage_style": "câmera baixa, ângulo dramático, luz dura — clima de documentário esportivo",
+      "forbidden_footage": [
+        "academia vazia e iluminada como publicidade",
+        "celebridade ou influencer sorrindo",
+        "stock genérico de fitness com mulher em legging colorida",
+        "comida saudável ou salada"
+      ],
+      "text_position": "terço inferior com scrim escuro",
+      "overlay": "dark com accent #C8FF00 nas palavras de maior impacto",
+      "pexels_queries": [
+        "gym workout intensity man",
+        "male athlete barbell training focus",
+        "weightlifting underground gym dark",
+        "fitness man sweat focus close up",
+        "bodybuilding training dark background"
+      ],
+      "min_duration": 10,
+      "max_duration": 20
+    },
+    "motion_ad": {
+      "style": "dark minimalista — fundo quase preto, texto em branco com acento verde-limão",
+      "animation": "texto surge com impacto seco, sem transições suaves ou efeitos brilhantes",
+      "use_when": "lançamento de produto, promoção relâmpago, urgência de estoque",
+      "forbidden_animations": ["fade suave", "brilho", "partículas", "gradiente colorido"],
+      "duration_seconds": 15,
+      "aspect_ratio": "9:16",
+      "copy_format": "headline em 2 tempos: tensão → resolução com produto",
+      "remotion_template": "dark_impact"
+    }
+  }
 }

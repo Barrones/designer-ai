@@ -74,6 +74,9 @@ class BrandProfile:
     handle: str = ""
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
+    # Direção criativa por formato (opcional — enriquece output de vídeo e motion)
+    creative_direction: dict = field(default_factory=dict)
+
     # ------------------------------------------------------------------
     # Persistência
     # ------------------------------------------------------------------
@@ -100,10 +103,14 @@ class BrandProfile:
 
     @classmethod
     def _from_dict(cls, d: dict) -> "BrandProfile":
+        import dataclasses
         d = dict(d)
         d["audience"]      = AudienceProfile(**d["audience"])
         d["color_palette"] = ColorPalette(**d["color_palette"])
         d["typography"]    = Typography(**d["typography"])
+        # Filtra campos desconhecidos para não quebrar com novos campos no JSON
+        known = {f.name for f in dataclasses.fields(cls)}
+        d = {k: v for k, v in d.items() if k in known}
         return cls(**d)
 
     # ------------------------------------------------------------------
@@ -129,3 +136,17 @@ class BrandProfile:
                 return rgb
         # Fallback absoluto: vermelho coral sempre legível
         return (230, 57, 70)
+
+    def designer_palette(self) -> dict:
+        """
+        Derive full Designer AI color palette from the brand's primary color.
+        Uses config.derive_palette() with the most appropriate color.
+        """
+        from designer import config
+        # Use accent as primary if it's vivid, otherwise use secondary
+        primary_hex = self.color_palette.accent
+        if primary_hex and primary_hex != "#FFFFFF":
+            return config.derive_palette(primary_hex)
+        if self.color_palette.secondary:
+            return config.derive_palette(self.color_palette.secondary)
+        return config.derive_palette(config.DEFAULT_BRAND_PRIMARY)

@@ -20,6 +20,10 @@ dependencies = [
     "streamlit>=1.56.0",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
+    "instagrapi>=2.1.2",
+    "groq>=1.1.2",
+    "agno>=2.5.14",
+    "discord-py>=2.7.1",
 ]
 
 [project.optional-dependencies]

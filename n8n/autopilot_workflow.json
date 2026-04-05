@@ -1,0 +1,395 @@
+{
+  "name": "Designer AI — Autopilot [TEMPLATE]",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1,3,5"
+            }
+          ]
+        }
+      },
+      "id": "node-schedule",
+      "name": "⏰ Schedule (Seg/Qua/Sex 9h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 400],
+      "notes": "Ajuste a frequência por cliente. Padrão: 3x/semana às 9h."
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "autopilot-trigger",
+        "options": {}
+      },
+      "id": "node-webhook-manual",
+      "name": "🔗 Webhook (disparo manual)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 600],
+      "webhookId": "autopilot-manual"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ══════════════════════════════════════════════════════════════════════\n// CONFIGURAÇÃO DO CLIENTE — edite aqui ao duplicar o workflow\n// ══════════════════════════════════════════════════════════════════════\nconst CLIENT = {\n  brand_slug: 'minha-marca',\n  brand_name: 'Minha Marca',\n  niche: 'finance',\n  cta: 'Saiba mais',\n  content_type: 'both',  // carousel | video | both\n  creator: '',           // criador de referência (vazio = sem)\n  duration: 15,          // duração do vídeo (seg)\n};\n\n// ══════════════════════════════════════════════════════════════════════\n// BANCO DE TEMAS — a IA roda um tema por execução, em ordem circular\n// ══════════════════════════════════════════════════════════════════════\nconst TEMAS = [\n  'Como economizar dinheiro em 2025',\n  '5 dicas para investir com pouco',\n  'Os erros que destroem seu score de crédito',\n  'Crédito pessoal: quando vale a pena?',\n  'O segredo dos juros compostos',\n  'Como sair das dívidas em 90 dias',\n  'Guia rápido de educação financeira',\n  'Cartão de crédito: inimigo ou aliado?',\n];\n\n// ── Rotação circular de temas ─────────────────────────────────────────\nconst staticData = $getWorkflowStaticData('global');\nlet idx = staticData.topicIndex || 0;\nif (idx >= TEMAS.length) idx = 0;\nconst topic = TEMAS[idx];\nstaticData.topicIndex = idx + 1;\n\nconst ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);\n\nreturn {\n  ...CLIENT,\n  topic,\n  topic_index: idx,\n  total_topics: TEMAS.length,\n  output_dir: `output/${CLIENT.brand_slug}_${ts}`,\n  execution_id: ts,\n};"
+      },
+      "id": "node-client-config",
+      "name": "⚙️ Config do Cliente + Rotação de Temas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DESIGNER_API_URL || 'http://localhost:8000' }}/copy",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, topic: $json.topic, creator: $json.creator || undefined }) }}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "node-copy",
+      "name": "✍️ Gerar Copy (Claude)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const copy = $input.item.json;\nconst vars = $('⚙️ Config do Cliente + Rotação de Temas').item.json;\n\nif (!copy.ok) {\n  throw new Error('Erro ao gerar copy: ' + JSON.stringify(copy));\n}\n\nreturn {\n  brand_slug: vars.brand_slug,\n  brand_name: vars.brand_name,\n  niche: vars.niche,\n  output_dir: vars.output_dir,\n  cta: vars.cta,\n  content_type: vars.content_type,\n  duration: vars.duration,\n  topic: vars.topic,\n  copy: {\n    formula: copy.formula,\n    headline_part1: copy.headline_part1,\n    headline_part2: copy.headline_part2,\n    caption: copy.caption,\n    hashtags: copy.hashtags,\n    image_query: copy.image_query,\n    video_query: copy.video_query,\n    compliance_flags: copy.compliance_flags\n  },\n  has_compliance_flags: (copy.compliance_flags ?? []).length > 0,\n  compliance_summary: (copy.compliance_flags ?? []).join(' | ')\n};"
+      },
+      "id": "node-merge",
+      "name": "Montar payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "cond-carousel",
+              "leftValue": "={{ $json.content_type }}",
+              "rightValue": "video",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-carousel",
+      "name": "Tem Carrossel?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1140, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DESIGNER_API_URL || 'http://localhost:8000' }}/render/carousel",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, output_dir: $json.output_dir, copy: $json.copy }) }}",
+        "options": { "timeout": 120000 }
+      },
+      "id": "node-carousel",
+      "name": "🖼️ Renderizar Carrossel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1360, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "cond-video",
+              "leftValue": "={{ $json.content_type }}",
+              "rightValue": "carousel",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-video",
+      "name": "Tem Vídeo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1140, 520]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DESIGNER_API_URL || 'http://localhost:8000' }}/render/video",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, output_dir: $json.output_dir, copy: $json.copy, cta: $json.cta, duration: $json.duration }) }}",
+        "options": { "timeout": 180000 }
+      },
+      "id": "node-video",
+      "name": "🎬 Renderizar Vídeo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1360, 600]
+    },
+    {
+      "parameters": {
+        "jsCode": "const vars = $('Montar payload').item.json;\n\nlet cover_path = null;\nlet video_path = null;\nlet slide_paths = [];\nlet drive_urls_carousel = [];\nlet drive_urls_video = [];\n\ntry {\n  const carousel = $('🖼️ Renderizar Carrossel').item.json;\n  if (carousel && carousel.ok) {\n    cover_path = carousel.cover_path;\n    slide_paths = carousel.slide_paths ?? [];\n    drive_urls_carousel = carousel.drive_urls ?? [];\n  }\n} catch(e) {}\n\ntry {\n  const video = $('🎬 Renderizar Vídeo').item.json;\n  if (video && video.ok) {\n    video_path = video.video_path;\n    drive_urls_video = video.drive_urls ?? [];\n  }\n} catch(e) {}\n\nreturn {\n  brand_slug: vars.brand_slug,\n  brand_name: vars.brand_name,\n  niche: vars.niche,\n  output_dir: vars.output_dir,\n  topic: vars.topic,\n  copy: vars.copy,\n  cover_path,\n  video_path,\n  slide_paths,\n  drive_urls: [...drive_urls_carousel, ...drive_urls_video],\n  has_compliance_flags: vars.has_compliance_flags,\n  compliance_summary: vars.compliance_summary\n};"
+      },
+      "id": "node-consolidate",
+      "name": "Consolidar resultados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1580, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false },
+          "conditions": [
+            {
+              "id": "cond-has-cover",
+              "leftValue": "={{ $json.cover_path }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-ads",
+      "name": "Tem capa para Ads?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1800, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DESIGNER_API_URL || 'http://localhost:8000' }}/render/ads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brand_slug: $json.brand_slug, brand_name: $json.brand_name, niche: $json.niche, output_dir: $json.output_dir, copy: $json.copy, cover_image_path: $json.cover_path, video_path: $json.video_path }) }}",
+        "options": { "timeout": 120000 }
+      },
+      "id": "node-ads",
+      "name": "📦 Gerar Pacote de Ads",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2020, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const vars = $('Consolidar resultados').item.json;\n\nlet ads_data = {};\ntry {\n  const ads = $('📦 Gerar Pacote de Ads').item.json;\n  if (ads && ads.ok) {\n    ads_data = {\n      google_copy: ads.google_copy,\n      meta_copy: ads.meta_copy,\n      report_path: ads.report_path\n    };\n  }\n} catch(e) {}\n\nconst copy = vars.copy;\n\nreturn {\n  ok: true,\n  brand: vars.brand_slug,\n  brand_name: vars.brand_name,\n  topic: vars.topic,\n  output_dir: vars.output_dir,\n  headline: copy.headline_part1 + ' ' + copy.headline_part2,\n  caption: copy.caption,\n  hashtags: copy.hashtags,\n  cover_path: vars.cover_path,\n  video_path: vars.video_path,\n  slide_paths: vars.slide_paths,\n  drive_urls: vars.drive_urls,\n  compliance_flags: vars.compliance_summary,\n  ads: ads_data,\n  generated_at: new Date().toISOString()\n};"
+      },
+      "id": "node-final",
+      "name": "Montar resposta final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2240, 400]
+    },
+    {
+      "parameters": {
+        "content": "✅ **Autopilot — Conteúdo Gerado!**\n\n**Cliente:** {{ $json.brand_name }}\n**Tema:** {{ $json.topic }}\n**Headline:** {{ $json.headline }}\n\n**Arquivos:**\n🖼️ Slides: {{ ($json.slide_paths ?? []).length }}\n🎬 Vídeo: `{{ $json.video_path ? 'Sim' : 'Não' }}`\n📦 Ads: `{{ $json.ads.report_path ? 'Sim' : 'Não' }}`\n\n{{ ($json.drive_urls ?? []).length > 0 ? '📁 Drive: ' + $json.drive_urls[0] : '' }}\n\n_{{ $json.generated_at }}_",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $env.DISCORD_CHANNEL_ID }}",
+          "mode": "id"
+        }
+      },
+      "id": "node-discord",
+      "name": "📨 Discord — Notificar",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [2460, 300],
+      "credentials": {
+        "discordBotApi": {
+          "id": "CONFIGURE_DISCORD_CREDENTIAL",
+          "name": "Discord Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ══════════════════════════════════════════════════════════════════════\n// PUBLICAÇÃO AUTOMÁTICA NAS REDES SOCIAIS\n// ══════════════════════════════════════════════════════════════════════\n// Este node prepara os dados para os nodes de publicação.\n// Descomente/configure os nodes de rede social que você usa.\n//\n// Instagram Business API: precisa de Facebook Page + Instagram Business Account\n// Facebook Page: precisa de Page Access Token\n// LinkedIn: precisa de LinkedIn Marketing API\n// Twitter/X: precisa de API v2 Bearer Token\n// ══════════════════════════════════════════════════════════════════════\n\nconst data = $('Montar resposta final').item.json;\n\nconst post = {\n  // Texto da publicação\n  caption: data.caption + '\\n\\n' + (data.hashtags || []).join(' '),\n  // Imagem principal (capa do carrossel)\n  image_path: data.cover_path,\n  // Vídeo (para Reels/Stories)\n  video_path: data.video_path,\n  // Carousel slides (para Instagram Carousel)\n  slide_paths: data.slide_paths || [],\n  // Metadados\n  brand: data.brand_name,\n  topic: data.topic,\n  headline: data.headline,\n};\n\nreturn post;"
+      },
+      "id": "node-social-prep",
+      "name": "📱 Preparar Post Social",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2460, 520],
+      "notes": "Prepara o payload para as APIs de redes sociais. Conecte os nodes de Instagram/Facebook/LinkedIn/Twitter abaixo."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ══════════════════════════════════════════════════════════════════════\n// PLACEHOLDER — INSTAGRAM BUSINESS API\n// ══════════════════════════════════════════════════════════════════════\n// Para ativar a publicação automática no Instagram:\n//\n// 1. Crie um app no Meta Business: https://developers.facebook.com\n// 2. Vincule sua Page + Instagram Business Account\n// 3. Gere um Page Access Token com permissões:\n//    - instagram_basic\n//    - instagram_content_publish\n//    - pages_read_engagement\n// 4. Substitua este Code node por um HTTP Request node:\n//\n//    POST https://graph.facebook.com/v19.0/{ig-user-id}/media\n//    Body: {\n//      image_url: <URL pública da imagem>,\n//      caption: $json.caption,\n//      access_token: <PAGE_ACCESS_TOKEN>\n//    }\n//\n//    Depois:\n//    POST https://graph.facebook.com/v19.0/{ig-user-id}/media_publish\n//    Body: { creation_id: <id do passo anterior>, access_token: ... }\n//\n// IMPORTANTE: O Instagram API exige que a imagem esteja em URL pública.\n// Use o Google Drive ou um bucket S3/R2 como CDN intermediário.\n// ══════════════════════════════════════════════════════════════════════\n\nreturn {\n  platform: 'instagram',\n  status: 'placeholder',\n  message: 'Configure o Instagram Business API para publicação automática.',\n  caption: $json.caption,\n  image: $json.image_path,\n};"
+      },
+      "id": "node-instagram",
+      "name": "📸 Instagram (placeholder)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2700, 440],
+      "notes": "Substitua por HTTP Request com Instagram Graph API quando tiver o token."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ══════════════════════════════════════════════════════════════════════\n// PLACEHOLDER — FACEBOOK PAGE API\n// ══════════════════════════════════════════════════════════════════════\n// POST https://graph.facebook.com/v19.0/{page-id}/photos\n// Body: { url: <URL pública>, message: $json.caption, access_token: ... }\n//\n// Para vídeo:\n// POST https://graph.facebook.com/v19.0/{page-id}/videos\n// Body: { file_url: <URL>, description: $json.caption, access_token: ... }\n// ══════════════════════════════════════════════════════════════════════\n\nreturn {\n  platform: 'facebook',\n  status: 'placeholder',\n  message: 'Configure o Facebook Page API.',\n};"
+      },
+      "id": "node-facebook",
+      "name": "📘 Facebook (placeholder)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2700, 600],
+      "notes": "Substitua por HTTP Request com Facebook Graph API."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ══════════════════════════════════════════════════════════════════════\n// LOG DE EXECUÇÃO — salva histórico de tudo que foi gerado\n// ══════════════════════════════════════════════════════════════════════\nconst data = $('Montar resposta final').item.json;\n\nreturn {\n  log: {\n    timestamp: data.generated_at,\n    brand: data.brand,\n    topic: data.topic,\n    headline: data.headline,\n    has_carousel: (data.slide_paths ?? []).length > 0,\n    has_video: !!data.video_path,\n    has_ads: !!data.ads?.report_path,\n    compliance_flags: data.compliance_flags || '',\n    drive_urls: data.drive_urls || [],\n  }\n};"
+      },
+      "id": "node-log",
+      "name": "📋 Log de Execução",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2700, 260]
+    }
+  ],
+  "connections": {
+    "⏰ Schedule (Seg/Qua/Sex 9h)": {
+      "main": [
+        [{ "node": "⚙️ Config do Cliente + Rotação de Temas", "type": "main", "index": 0 }]
+      ]
+    },
+    "🔗 Webhook (disparo manual)": {
+      "main": [
+        [{ "node": "⚙️ Config do Cliente + Rotação de Temas", "type": "main", "index": 0 }]
+      ]
+    },
+    "⚙️ Config do Cliente + Rotação de Temas": {
+      "main": [
+        [{ "node": "✍️ Gerar Copy (Claude)", "type": "main", "index": 0 }]
+      ]
+    },
+    "✍️ Gerar Copy (Claude)": {
+      "main": [
+        [{ "node": "Montar payload", "type": "main", "index": 0 }]
+      ]
+    },
+    "Montar payload": {
+      "main": [
+        [
+          { "node": "Tem Carrossel?", "type": "main", "index": 0 },
+          { "node": "Tem Vídeo?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Tem Carrossel?": {
+      "main": [
+        [{ "node": "🖼️ Renderizar Carrossel", "type": "main", "index": 0 }],
+        [{ "node": "Consolidar resultados", "type": "main", "index": 0 }]
+      ]
+    },
+    "🖼️ Renderizar Carrossel": {
+      "main": [
+        [{ "node": "Consolidar resultados", "type": "main", "index": 0 }]
+      ]
+    },
+    "Tem Vídeo?": {
+      "main": [
+        [{ "node": "🎬 Renderizar Vídeo", "type": "main", "index": 0 }],
+        [{ "node": "Consolidar resultados", "type": "main", "index": 1 }]
+      ]
+    },
+    "🎬 Renderizar Vídeo": {
+      "main": [
+        [{ "node": "Consolidar resultados", "type": "main", "index": 1 }]
+      ]
+    },
+    "Consolidar resultados": {
+      "main": [
+        [{ "node": "Tem capa para Ads?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Tem capa para Ads?": {
+      "main": [
+        [{ "node": "📦 Gerar Pacote de Ads", "type": "main", "index": 0 }],
+        [{ "node": "Montar resposta final", "type": "main", "index": 0 }]
+      ]
+    },
+    "📦 Gerar Pacote de Ads": {
+      "main": [
+        [{ "node": "Montar resposta final", "type": "main", "index": 0 }]
+      ]
+    },
+    "Montar resposta final": {
+      "main": [
+        [
+          { "node": "📨 Discord — Notificar", "type": "main", "index": 0 },
+          { "node": "📱 Preparar Post Social", "type": "main", "index": 0 },
+          { "node": "📋 Log de Execução", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "📱 Preparar Post Social": {
+      "main": [
+        [
+          { "node": "📸 Instagram (placeholder)", "type": "main", "index": 0 },
+          { "node": "📘 Facebook (placeholder)", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": {
+    "global": {
+      "topicIndex": 0
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "designer-ai-autopilot"
+  },
+  "tags": [
+    { "id": "tag-1", "name": "autopilot" },
+    { "id": "tag-2", "name": "content" },
+    { "id": "tag-3", "name": "ai" }
+  ]
+}

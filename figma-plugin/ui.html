@@ -1,0 +1,848 @@
+<html>
+<head>
+  <style>
+    :root {
+      --bg: #0d0f0d;
+      --surface: #161916;
+      --surface-hover: #1c1f1c;
+      --border: #2a2d2a;
+      --text: #e0e0e0;
+      --text-muted: #666;
+      --accent: #E8421A;
+      --accent-dim: rgba(232,66,26,0.15);
+      --accent-hover: #ff5a33;
+      --success: #4caf50;
+      --success-dim: rgba(76,175,80,0.12);
+      --error: #f44336;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 12px;
+      color: var(--text);
+      background: var(--bg);
+      padding: 16px;
+      line-height: 1.5;
+    }
+
+    /* ─── Header ─── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .header-left { display: flex; align-items: baseline; gap: 8px; }
+    .header h1 { font-size: 18px; font-weight: 800; color: #fff; }
+    .header h1 em { font-style: normal; color: var(--accent); }
+    .version {
+      background: var(--accent);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .powered {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    /* ─── Slide Bar ─── */
+    .slide-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      margin-bottom: 10px;
+    }
+    .slide-count {
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .slide-dots { display: flex; gap: 4px; flex-wrap: wrap; }
+    .slide-dot {
+      width: 26px; height: 26px;
+      background: var(--border);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: var(--text-muted);
+    }
+    .slide-dot.active { background: var(--accent); color: #fff; }
+
+    /* ─── Accordion ─── */
+    .accordion { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .section-header:hover { background: var(--surface-hover); }
+    .section-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .section-icon {
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+    .section-title { font-size: 13px; font-weight: 600; color: #fff; }
+    .section-arrow {
+      font-size: 10px; color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    .section.open .section-arrow { transform: rotate(90deg); }
+
+    .section-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .section.open .section-body { max-height: 800px; }
+
+    .section-content { padding: 0 14px 14px; }
+
+    /* ─── Inputs ─── */
+    textarea, input[type="text"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 12px;
+    }
+    textarea {
+      padding: 10px 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+    input[type="text"] { padding: 10px 12px; }
+    textarea::placeholder, input[type="text"]::placeholder { color: #444; }
+    textarea:focus, input[type="text"]:focus { outline: none; border-color: var(--accent); }
+
+    .input-group { margin-bottom: 8px; }
+    .input-group:last-child { margin-bottom: 0; }
+
+    .row { display: flex; gap: 8px; }
+    .row > * { flex: 1; }
+
+    .hint {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    /* ─── Avatar ─── */
+    .avatar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .avatar-circle {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .avatar-inputs { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+    /* ─── Btn Aplicar (por seção) ─── */
+    .btn-section {
+      display: inline-block;
+      padding: 6px 16px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.15s;
+    }
+    .btn-section:hover { background: var(--accent-dim); }
+
+    /* ─── Dropzone (Imagens) ─── */
+    .dropzone {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .dropzone:hover { border-color: var(--accent); background: rgba(232,66,26,0.04); }
+    .dropzone.drag-over { border-color: var(--accent); background: rgba(232,66,26,0.08); }
+    .dropzone-icon { font-size: 22px; color: var(--text-muted); margin-bottom: 6px; }
+    .dropzone-text { font-size: 12px; color: var(--text-muted); }
+    .dropzone-formats { font-size: 10px; color: #555; margin-top: 2px; }
+
+    /* ─── Image Slots Grid ─── */
+    .image-slots {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .image-slot-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .image-slot-row.drag-over-slot {
+      border-color: var(--accent);
+      background: rgba(232,66,26,0.06);
+    }
+    .image-slot-row.dragging {
+      opacity: 0.4;
+    }
+    .slot-number {
+      width: 24px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .slot-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slot-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .slot-thumb-empty {
+      font-size: 16px;
+      color: #444;
+    }
+    .slot-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .slot-name {
+      font-size: 11px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .slot-layer {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+    .slot-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .slot-btn {
+      width: 22px;
+      height: 22px;
+      border: none;
+      background: var(--surface);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .slot-btn:hover { color: var(--text); background: var(--border); }
+    .slot-btn.grab { cursor: grab; }
+    .slot-btn.grab:active { cursor: grabbing; }
+
+    /* ─── Paletas (Cores) ─── */
+    .palette-list { display: flex; flex-direction: column; gap: 6px; }
+    .palette-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .palette-row:hover { border-color: #555; }
+    .palette-row.selected { border-color: var(--accent); }
+    .palette-name { font-size: 12px; font-weight: 500; }
+    .palette-right { display: flex; align-items: center; gap: 8px; }
+    .palette-dots { display: flex; gap: 4px; }
+    .palette-dot {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .palette-edit {
+      font-size: 11px; color: var(--text-muted);
+      cursor: pointer; background: none; border: none;
+      padding: 2px;
+    }
+    .palette-edit:hover { color: var(--text); }
+
+    .palette-actions {
+      display: flex; gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-palette {
+      flex: 1;
+      padding: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn-palette:hover { border-color: #555; color: var(--text); }
+
+    /* ─── Exportar ─── */
+    .export-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .export-hint {
+      font-size: 10px;
+      color: #555;
+      margin-top: 4px;
+    }
+    .btn-export {
+      display: inline-block;
+      padding: 8px 20px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn-export:hover { background: var(--accent-dim); }
+
+    /* ─── Aplicar Tudo ─── */
+    .btn-apply {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, #1a3a1a, #2d5a2d);
+      border: 1px solid rgba(76,175,80,0.3);
+      color: #4caf50;
+      transition: opacity 0.15s;
+      letter-spacing: 0.3px;
+    }
+    .btn-apply:hover { opacity: 0.9; }
+
+    /* ─── Status ─── */
+    .status {
+      text-align: center;
+      font-size: 11px;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      display: none;
+      margin-top: 8px;
+    }
+    .status.success { display: block; background: var(--success-dim); color: var(--success); }
+    .status.error { display: block; background: rgba(244,67,54,0.12); color: var(--error); }
+
+    .footer {
+      text-align: center;
+      font-size: 10px;
+      color: #444;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Designer <em>AI</em></h1>
+      <span class="version">1.0</span>
+    </div>
+  </div>
+  <p class="powered">Powered by Julio Barrao</p>
+
+  <!-- Slide Bar -->
+  <div class="slide-bar">
+    <span class="slide-count" id="slideCount">0 slide(s)</span>
+    <div class="slide-dots" id="slideDots"></div>
+  </div>
+
+  <!-- Accordion -->
+  <div class="accordion">
+
+    <!-- ═══ CABEÇALHO ═══ -->
+    <div class="section open" data-section="header">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-header-left">
+          <div class="section-icon">👤</div>
+          <span class="section-title">Cabeçalho</span>
+        </div>
+        <span class="section-arrow">›</span>
+      </div>
+      <div class="section-body">
+        <div class="section-content">
+          <div class="avatar-row">
+            <div class="avatar-circle">👤</div>
+            <div class="avatar-inputs">
+              <input type="text" id="handle" placeholder="@perfil">
+              <input type="text" id="brandName" placeholder="Nome e Sobrenome">
+            </div>
+          </div>
+          <p class="hint">Foto → camada "Foto Perfil" · @ → "Perfil" · Nome → "Nome"</p>
+          <button class="btn-section" onclick="applyProfile()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TEXTOS ═══ -->
+    <div class="section" data-section="texts">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-header-left">
+          <div class="section-icon">T</div>
+          <span class="section-title">Textos</span>
+        </div>
+        <span class="section-arrow">›</span>
+      </div>
+      <div class="section-body">
+        <div class="section-content">
+          <textarea id="texts" rows="8" placeholder="texto 1 – Título&#10;texto 2 - Corpo&#10;texto 3 - Apoio"></textarea>
+          <button class="btn-section" onclick="applyTexts()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ IMAGENS ═══ -->
+    <div class="section" data-section="images">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-header-left">
+          <div class="section-icon">🖼</div>
+          <span class="section-title">Imagens</span>
+        </div>
+        <span class="section-arrow">›</span>
+      </div>
+      <div class="section-body">
+        <div class="section-content">
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+            <div class="dropzone-icon">↑</div>
+            <div class="dropzone-text">Arraste ou clique</div>
+            <div class="dropzone-formats">PNG, JPG, WebP</div>
+          </div>
+          <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple style="display:none" onchange="handleFiles(this.files)">
+          <div class="image-slots" id="imageSlots"></div>
+          <p class="hint" id="imageHint" style="display:none;">↕ Arraste para reordenar · Cada imagem vai para a camada "imagem N" correspondente</p>
+          <button class="btn-section" onclick="applyImages()" style="display:none" id="btnApplyImages">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CORES ═══ -->
+    <div class="section" data-section="colors">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-header-left">
+          <div class="section-icon">◯</div>
+          <span class="section-title">Cores</span>
+        </div>
+        <span class="section-arrow">›</span>
+      </div>
+      <div class="section-body">
+        <div class="section-content">
+          <div class="palette-list" id="paletteList"></div>
+          <div class="palette-actions">
+            <button class="btn-palette" onclick="addCustomPalette()">+ Nova Paleta</button>
+            <button class="btn-palette" onclick="extractFromFrame()">Extrair do Frame</button>
+          </div>
+          <button class="btn-section" onclick="applyColors()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ EXPORTAR ═══ -->
+    <div class="section" data-section="export">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-header-left">
+          <div class="section-icon">↓</div>
+          <span class="section-title">Exportar</span>
+        </div>
+        <span class="section-arrow">›</span>
+      </div>
+      <div class="section-body">
+        <div class="section-content">
+          <div class="export-label">Nome do carrossel</div>
+          <input type="text" id="exportName" placeholder="Ex: Topo de Funil – A Morte dos Especialistas">
+          <p class="export-hint">Numerado automaticamente: Nome_1.png, Nome_2.png...</p>
+          <button class="btn-export" onclick="exportZip()">Exportar ZIP</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Aplicar Tudo -->
+  <button class="btn-apply" onclick="applyAll()">⚡ Aplicar Tudo</button>
+
+  <!-- Status -->
+  <div id="status" class="status"></div>
+
+  <div class="footer">Designer AI 1.0 · Julio Barrao · 2026</div>
+
+  <script>
+    // ─── Palettes ───
+    const PALETTES = [
+      { name: 'Padrão',      colors: ['#1a1a2e', '#E8421A', '#f0ece4'], selected: true },
+      { name: 'Corporativo', colors: ['#1a1a2e', '#2563eb', '#0ea5e9'] },
+      { name: 'Natureza',    colors: ['#8b7355', '#6b8e5a', '#2d4a2d'] },
+      { name: 'Impacto',     colors: ['#1a1a2e', '#e91e63', '#f8f8f8'] },
+    ];
+
+    let selectedPalette = 0;
+
+    function renderPalettes() {
+      const el = document.getElementById('paletteList');
+      el.innerHTML = PALETTES.map((p, i) => `
+        <div class="palette-row ${i === selectedPalette ? 'selected' : ''}" onclick="selectPalette(${i})">
+          <span class="palette-name">${p.name}</span>
+          <div class="palette-right">
+            <div class="palette-dots">
+              ${p.colors.map(c => `<div class="palette-dot" style="background:${c}"></div>`).join('')}
+            </div>
+            <button class="palette-edit" onclick="event.stopPropagation();editPalette(${i})" title="Editar">✎</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectPalette(i) {
+      selectedPalette = i;
+      renderPalettes();
+    }
+
+    function editPalette(i) {
+      const p = PALETTES[i];
+      const newColors = prompt(`Editar cores de "${p.name}" (3 hex separados por vírgula):`, p.colors.join(', '));
+      if (!newColors) return;
+      const parsed = newColors.split(',').map(c => c.trim()).filter(c => /^#?[0-9A-Fa-f]{6}$/.test(c));
+      if (parsed.length >= 3) {
+        PALETTES[i].colors = parsed.slice(0, 3).map(c => c.startsWith('#') ? c : '#' + c);
+        renderPalettes();
+      }
+    }
+
+    function addCustomPalette() {
+      const name = prompt('Nome da nova paleta:');
+      if (!name) return;
+      const colors = prompt('3 cores hex separadas por vírgula:', '#1a1a2e, #E8421A, #f0ece4');
+      if (!colors) return;
+      const parsed = colors.split(',').map(c => c.trim()).filter(c => /^#?[0-9A-Fa-f]{6}$/.test(c));
+      if (parsed.length >= 3) {
+        PALETTES.push({
+          name: name,
+          colors: parsed.slice(0, 3).map(c => c.startsWith('#') ? c : '#' + c),
+        });
+        selectedPalette = PALETTES.length - 1;
+        renderPalettes();
+      }
+    }
+
+    function extractFromFrame() {
+      parent.postMessage({ pluginMessage: { type: 'extract-colors' } }, '*');
+    }
+
+    renderPalettes();
+
+    // ─── Accordion ───
+    function toggleSection(header) {
+      header.parentElement.classList.toggle('open');
+    }
+
+    // ─── Text Stats ───
+    document.getElementById('texts').addEventListener('input', updateStats);
+
+    function updateStats() {
+      const lines = parseTexts();
+      const count = lines.length;
+      const slides = Math.ceil(count / 2);
+
+      document.getElementById('slideCount').textContent = `${slides} slide(s)`;
+      const dotsEl = document.getElementById('slideDots');
+      dotsEl.innerHTML = '';
+      for (let i = 1; i <= Math.min(slides, 12); i++) {
+        const dot = document.createElement('div');
+        dot.className = 'slide-dot' + (i === 1 ? ' active' : '');
+        dot.textContent = i;
+        dotsEl.appendChild(dot);
+      }
+      if (slides > 12) {
+        const more = document.createElement('div');
+        more.className = 'slide-dot';
+        more.textContent = '···';
+        dotsEl.appendChild(more);
+      }
+    }
+
+    // ─── Images (Drag & Drop + Reorder) ───
+    const dropzone = document.getElementById('dropzone');
+    const uploadedImages = [];
+    let dragSrcIndex = null;
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('drag-over');
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('drag-over');
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length > 0) {
+        handleFiles(e.dataTransfer.files);
+      }
+    });
+
+    function handleFiles(files) {
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) continue;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          uploadedImages.push({ name: file.name, data: ev.target.result });
+          renderImageSlots();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function renderImageSlots() {
+      const el = document.getElementById('imageSlots');
+      const hint = document.getElementById('imageHint');
+      const btn = document.getElementById('btnApplyImages');
+
+      if (uploadedImages.length === 0) {
+        el.innerHTML = '';
+        hint.style.display = 'none';
+        btn.style.display = 'none';
+        return;
+      }
+
+      hint.style.display = 'block';
+      btn.style.display = 'inline-block';
+
+      el.innerHTML = uploadedImages.map((img, i) => `
+        <div class="image-slot-row" draggable="true" data-index="${i}"
+             ondragstart="onSlotDragStart(event, ${i})"
+             ondragover="onSlotDragOver(event)"
+             ondragenter="onSlotDragEnter(event)"
+             ondragleave="onSlotDragLeave(event)"
+             ondrop="onSlotDrop(event, ${i})"
+             ondragend="onSlotDragEnd()">
+          <span class="slot-number">${i + 1}</span>
+          <div class="slot-thumb">
+            <img src="${img.data}" alt="">
+          </div>
+          <div class="slot-info">
+            <div class="slot-name">${img.name}</div>
+            <div class="slot-layer">→ imagem ${i + 1}</div>
+          </div>
+          <div class="slot-actions">
+            ${i > 0 ? `<button class="slot-btn" onclick="moveImage(${i}, ${i - 1})" title="Mover para cima">↑</button>` : ''}
+            ${i < uploadedImages.length - 1 ? `<button class="slot-btn" onclick="moveImage(${i}, ${i + 1})" title="Mover para baixo">↓</button>` : ''}
+            <button class="slot-btn grab" title="Arrastar">⠿</button>
+            <button class="slot-btn" onclick="removeImage(${i})" title="Remover" style="color:#f44336;">×</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ─── Slot Drag & Drop Reorder ───
+    function onSlotDragStart(e, index) {
+      dragSrcIndex = index;
+      e.currentTarget.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function onSlotDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    function onSlotDragEnter(e) {
+      e.preventDefault();
+      const row = e.currentTarget;
+      if (row.classList) row.classList.add('drag-over-slot');
+    }
+
+    function onSlotDragLeave(e) {
+      const row = e.currentTarget;
+      if (row.classList) row.classList.remove('drag-over-slot');
+    }
+
+    function onSlotDrop(e, targetIndex) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over-slot');
+      if (dragSrcIndex !== null && dragSrcIndex !== targetIndex) {
+        moveImage(dragSrcIndex, targetIndex);
+      }
+      dragSrcIndex = null;
+    }
+
+    function onSlotDragEnd() {
+      dragSrcIndex = null;
+      document.querySelectorAll('.image-slot-row').forEach(r => {
+        r.classList.remove('dragging', 'drag-over-slot');
+      });
+    }
+
+    function moveImage(from, to) {
+      const [item] = uploadedImages.splice(from, 1);
+      uploadedImages.splice(to, 0, item);
+      renderImageSlots();
+    }
+
+    function removeImage(i) {
+      uploadedImages.splice(i, 1);
+      renderImageSlots();
+    }
+
+    // ─── Parsing ───
+    function parseTexts() {
+      const raw = document.getElementById('texts').value.trim();
+      if (!raw) return [];
+      return raw.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => {
+          const match = line.match(/^texto\s+(\d+)\s*[-–—:]\s*(.*)$/i);
+          if (match) return { index: parseInt(match[1]), content: match[2].trim() };
+          return { index: null, content: line };
+        });
+    }
+
+    function getProfile() {
+      return {
+        handle: document.getElementById('handle').value.trim(),
+        name: document.getElementById('brandName').value.trim(),
+      };
+    }
+
+    function getSelectedColors() {
+      return PALETTES[selectedPalette].colors;
+    }
+
+    // ─── Actions → Figma ───
+    function applyAll() {
+      const texts = parseTexts();
+      const colors = getSelectedColors();
+      const profile = getProfile();
+      const images = uploadedImages.map(img => img.data);
+
+      parent.postMessage({
+        pluginMessage: { type: 'apply-all', texts, colors, profile, images }
+      }, '*');
+    }
+
+    function applyProfile() {
+      const profile = getProfile();
+      parent.postMessage({ pluginMessage: { type: 'apply-profile', profile } }, '*');
+    }
+
+    function applyTexts() {
+      const texts = parseTexts();
+      if (texts.length === 0) { showStatus('Nenhum texto encontrado.', 'error'); return; }
+      parent.postMessage({ pluginMessage: { type: 'apply-texts', texts } }, '*');
+    }
+
+    function applyImages() {
+      const images = uploadedImages.map(img => img.data);
+      if (images.length === 0) { showStatus('Nenhuma imagem selecionada.', 'error'); return; }
+      parent.postMessage({ pluginMessage: { type: 'apply-images', images } }, '*');
+    }
+
+    function applyColors() {
+      const colors = getSelectedColors();
+      parent.postMessage({ pluginMessage: { type: 'apply-colors', colors } }, '*');
+    }
+
+    function exportZip() {
+      const name = document.getElementById('exportName').value.trim() || 'carrossel';
+      parent.postMessage({ pluginMessage: { type: 'export-zip', name } }, '*');
+    }
+
+    // ─── Messages from Figma ───
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+      if (msg.type === 'status') {
+        showStatus(msg.message, msg.success ? 'success' : 'error');
+      }
+      if (msg.type === 'extracted-colors' && msg.colors) {
+        PALETTES.push({ name: 'Do Frame', colors: msg.colors.slice(0, 3) });
+        selectedPalette = PALETTES.length - 1;
+        renderPalettes();
+        showStatus('✅ Cores extraídas do frame!', 'success');
+      }
+    };
+
+    function showStatus(message, type) {
+      const el = document.getElementById('status');
+      el.className = 'status' + (type ? ' ' + type : '');
+      el.textContent = message;
+    }
+  </script>
+
+</body>
+</html>

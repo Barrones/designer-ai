@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: designer-ai
+    runtime: python
+    buildCommand: pip install uv && uv sync --frozen
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PEXELS_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_CHANNEL_ID
+        sync: false
+      - key: IG_USERNAME
+        sync: false
+      - key: IG_PASSWORD
+        sync: false
+      - key: IG_SESSION_ID
+        sync: false
+      - key: GOOGLE_DRIVE_FOLDER_ID
+        sync: false
+      - key: TOPVIEW_API_KEY
+        sync: false
+      - key: TOPVIEW_UID
+        sync: false
